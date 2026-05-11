@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
@@ -39,7 +40,12 @@ class VisualEditorActivity : BaseActivity() {
     private lateinit var pageTitle: PageTitle
     private var sectionId: Int = SECTION_WHOLE_ARTICLE
 
+    // True once we have confirmed the #/editor/ URL is active (editor UI is up).
     private var hasEditorLoaded = false
+    // True once we have seen at least one #/editor/ URL (guards against spurious
+    // "exit" signals before the editor has ever appeared).
+    private var wasInEditorUrl = false
+    // Set to true when a save or cancel is being handled, to prevent double-firing.
     private var saveHandled = false
     private var loadStartTime = 0L
 
@@ -85,6 +91,8 @@ class VisualEditorActivity : BaseActivity() {
             mediaPlaybackRequiresUserGesture = false
         }
 
+        // Register the JS→Kotlin bridge before any page loads.
+        binding.webView.addJavascriptInterface(VisualEditorJsInterface(), JS_INTERFACE_NAME)
         binding.webView.webViewClient = VisualEditorWebViewClient()
         binding.webView.webChromeClient = object : WebChromeClient() {
             override fun onJsConfirm(
@@ -135,6 +143,10 @@ class VisualEditorActivity : BaseActivity() {
         showErrorView(false)
         binding.progressBar.isVisible = true
         loadStartTime = System.currentTimeMillis()
+        // Reset state so a retry starts fresh.
+        hasEditorLoaded = false
+        wasInEditorUrl = false
+        saveHandled = false
         timeoutHandler.postDelayed(loadTimeoutRunnable, LOAD_TIMEOUT_MS)
         EditAttemptStepEvent.logInit(pageTitle, EditAttemptStepEvent.INTERFACE_VISUAL)
         binding.webView.loadUrl(url)
@@ -149,8 +161,15 @@ class VisualEditorActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Returns true when [url] represents an active Visual Editor session.
+     * VE rewrites the URL via history.pushState to use a `#/editor/<section>` fragment,
+     * so we must recognise both the initial `veaction=edit` query form and the pushState form.
+     */
     private fun isVisualEditorUrl(url: String): Boolean {
-        return url.contains("veaction=edit") || url.contains("action=visualeditor")
+        return url.contains("veaction=edit") ||
+                url.contains("action=visualeditor") ||
+                Uri.parse(url).fragment?.startsWith("/editor/") == true
     }
 
     private fun onLoadTimeout() {
@@ -181,6 +200,50 @@ class VisualEditorActivity : BaseActivity() {
         finish()
     }
 
+    private fun onExitWithoutSave() {
+        if (saveHandled) return
+        saveHandled = true
+        setResult(RESULT_CANCELED)
+        finish()
+    }
+
+    /**
+     * Called (on the main thread) whenever the WebView URL changes via
+     * history.pushState / history.replaceState.  We use the `#/editor/` fragment
+     * to detect when the VE is active and when it has exited back to the article.
+     */
+    private fun handleUrlChange(fullUrl: String) {
+        if (saveHandled) return
+
+        val uri = Uri.parse(fullUrl)
+        val fragment = uri.fragment
+
+        if (fragment?.startsWith("/editor/") == true) {
+            // The VE editor URL is now active.
+            wasInEditorUrl = true
+            if (!hasEditorLoaded) {
+                hasEditorLoaded = true
+                timeoutHandler.removeCallbacks(loadTimeoutRunnable)
+                val latencyMs = if (loadStartTime > 0) System.currentTimeMillis() - loadStartTime else 0L
+                L.d("VisualEditor loaded (pushState); latencyMs=$latencyMs")
+            }
+            return
+        }
+
+        // Fragment is gone (or is something else) — the VE has exited.
+        // Ignore this if we have not seen the editor URL yet (could be an intermediate redirect).
+        if (!wasInEditorUrl) return
+
+        val veNotify = uri.getQueryParameter("venotify")
+        val oldId = uri.getQueryParameter("oldid")?.toLongOrNull() ?: 0L
+
+        if (veNotify == "saved" || oldId > 0) {
+            onSaveDetected(oldId)
+        } else {
+            onExitWithoutSave()
+        }
+    }
+
     private fun onCloseRequested() {
         if (hasEditorLoaded && !saveHandled) {
             MaterialAlertDialogBuilder(this)
@@ -188,8 +251,7 @@ class VisualEditorActivity : BaseActivity() {
                 .setPositiveButton(getString(R.string.edit_abandon_confirm_yes)) { dialog, _ ->
                     dialog.dismiss()
                     EditAttemptStepEvent.logSaveFailure(pageTitle, EditAttemptStepEvent.INTERFACE_VISUAL)
-                    setResult(RESULT_CANCELED)
-                    finish()
+                    onExitWithoutSave()
                 }
                 .setNegativeButton(getString(R.string.edit_abandon_confirm_no)) { dialog, _ ->
                     dialog.dismiss()
@@ -199,6 +261,20 @@ class VisualEditorActivity : BaseActivity() {
         } else {
             setResult(RESULT_CANCELED)
             finish()
+        }
+    }
+
+    /**
+     * JavaScript-to-Kotlin bridge.  The JS shim injected in [injectUrlChangeMonitor] calls
+     * [onUrlChanged] via `VisualEditorBridge.onUrlChanged(url)` whenever VE changes the URL
+     * through history.pushState, history.replaceState, or a popstate event.
+     */
+    inner class VisualEditorJsInterface {
+        @JavascriptInterface
+        fun onUrlChanged(url: String) {
+            // The @JavascriptInterface method is called on a background thread;
+            // post to main thread before touching any UI or state.
+            binding.webView.post { handleUrlChange(url) }
         }
     }
 
@@ -222,19 +298,18 @@ class VisualEditorActivity : BaseActivity() {
             binding.progressBar.isVisible = true
             url ?: return
 
+            // Guard: real navigations (not pushState) can also carry save/exit signals.
             val uri = Uri.parse(url)
             val veNotify = uri.getQueryParameter("venotify")
             if (veNotify == "saved") {
-                // VE signals a successful save
                 val revId = uri.getQueryParameter("oldid")?.toLongOrNull() ?: 0L
                 onSaveDetected(revId)
                 return
             }
 
             if (hasEditorLoaded && !isVisualEditorUrl(url) && !saveHandled) {
-                // URL changed away from VE without a save signal: the user cancelled via VE UI
-                setResult(RESULT_CANCELED)
-                finish()
+                // A real navigation away from the VE (not a pushState change).
+                onExitWithoutSave()
             }
         }
 
@@ -244,10 +319,18 @@ class VisualEditorActivity : BaseActivity() {
             binding.progressBar.isVisible = false
             setCookies(url.orEmpty())
 
-            if (!url.isNullOrEmpty() && isVisualEditorUrl(url) && !saveHandled) {
-                hasEditorLoaded = true
-                val latencyMs = if (loadStartTime > 0) System.currentTimeMillis() - loadStartTime else 0L
-                L.d("VisualEditor loaded; latencyMs=$latencyMs")
+            if (!saveHandled) {
+                // Mark the editor as loaded unconditionally: by the time onPageFinished fires,
+                // VE may have already rewritten the URL to #/editor/… via pushState, so we
+                // cannot rely on isVisualEditorUrl() here.
+                if (!hasEditorLoaded) {
+                    hasEditorLoaded = true
+                    val latencyMs = if (loadStartTime > 0) System.currentTimeMillis() - loadStartTime else 0L
+                    L.d("VisualEditor loaded; latencyMs=$latencyMs")
+                }
+                // Inject the pushState/replaceState monitor so subsequent JS-only URL changes
+                // are forwarded to handleUrlChange() via the VisualEditorBridge interface.
+                injectUrlChangeMonitor(view)
             }
         }
 
@@ -262,6 +345,34 @@ class VisualEditorActivity : BaseActivity() {
                 showErrorView(true)
             }
         }
+
+        private fun injectUrlChangeMonitor(view: WebView?) {
+            // Language: plain ES5 to maximise compatibility with older system WebViews.
+            // We guard with __veUrlMonitorInstalled so re-injection on retry is idempotent.
+            val js = """
+                (function() {
+                    if (window.__veUrlMonitorInstalled) return;
+                    window.__veUrlMonitorInstalled = true;
+                    var origPush = history.pushState;
+                    var origReplace = history.replaceState;
+                    function notify(url) {
+                        try { $JS_INTERFACE_NAME.onUrlChanged(url || window.location.href); } catch(e) { console.error('VisualEditorBridge error:', e); }
+                    }
+                    history.pushState = function(s, t, url) {
+                        origPush.apply(this, arguments);
+                        notify(typeof url === 'string' ? url : window.location.href);
+                    };
+                    history.replaceState = function(s, t, url) {
+                        origReplace.apply(this, arguments);
+                        notify(typeof url === 'string' ? url : window.location.href);
+                    };
+                    window.addEventListener('popstate', function() {
+                        notify(window.location.href);
+                    });
+                })();
+            """.trimIndent()
+            view?.evaluateJavascript(js, null)
+        }
     }
 
     companion object {
@@ -269,11 +380,11 @@ class VisualEditorActivity : BaseActivity() {
         const val EXTRA_REV_ID = "revId"
         const val SECTION_WHOLE_ARTICLE = -1
         private const val LOAD_TIMEOUT_MS = 30_000L
+        private const val JS_INTERFACE_NAME = "VisualEditorBridge"
 
         fun newIntent(
             context: Context,
             sectionId: Int,
-            sectionAnchor: String?,
             title: PageTitle,
             invokeSource: Constants.InvokeSource
         ): Intent {

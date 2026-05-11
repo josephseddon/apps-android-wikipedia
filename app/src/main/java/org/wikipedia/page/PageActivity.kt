@@ -114,10 +114,9 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     private var exclusiveTooltipRunnable: Runnable? = null
     private var isTooltipShowing = false
 
-    // Pending edit state saved across a login attempt
-    private var pendingEditSectionId: Int = -1
-    private var pendingEditSectionAnchor: String? = null
-    private var pendingEditTitle: PageTitle? = null
+    // Pending edit state saved across a login attempt, encapsulated so all fields reset together.
+    private data class PendingEditState(val sectionId: Int, val title: PageTitle)
+    private var pendingEdit: PendingEditState? = null
 
     private fun onVisualEditorResult(resultCode: Int, data: Intent?) {
         if (resultCode == EditHandler.RESULT_REFRESH_PAGE) {
@@ -143,17 +142,13 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
 
     private val requestLoginForVisualEditorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == LoginActivity.RESULT_LOGIN_SUCCESS) {
-            pendingEditTitle?.let { title ->
+            pendingEdit?.let { edit ->
                 requestVisualEditorLauncher.launch(
-                    VisualEditorActivity.newIntent(
-                        this, pendingEditSectionId, pendingEditSectionAnchor,
-                        title, InvokeSource.PAGE_ACTIVITY
-                    )
+                    VisualEditorActivity.newIntent(this, edit.sectionId, edit.title, InvokeSource.PAGE_ACTIVITY)
                 )
             }
         }
-        pendingEditTitle = null
-        pendingEditSectionAnchor = null
+        pendingEdit = null
     }
 
     private val requestEditSectionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -531,12 +526,10 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     override fun onPageRequestEditSection(sectionId: Int, sectionAnchor: String?, title: PageTitle, highlightText: String?) {
         if (AccountUtil.isLoggedIn) {
             requestVisualEditorLauncher.launch(
-                VisualEditorActivity.newIntent(this, sectionId, sectionAnchor, title, InvokeSource.PAGE_ACTIVITY)
+                VisualEditorActivity.newIntent(this, sectionId, title, InvokeSource.PAGE_ACTIVITY)
             )
         } else {
-            pendingEditSectionId = sectionId
-            pendingEditSectionAnchor = sectionAnchor
-            pendingEditTitle = title
+            pendingEdit = PendingEditState(sectionId, title)
             requestLoginForVisualEditorLauncher.launch(
                 LoginActivity.newIntent(this, LoginActivity.SOURCE_EDIT)
             )
