@@ -7,6 +7,7 @@ import java.time.Instant
 
 @Suppress("unused")
 @Serializable
-sealed class EventWithDt(@Transient private val _streamName: String = "") : Event(_streamName) {
+sealed class EventWithDt(
+    @Transient private val _streamName: String = "",
     @EncodeDefault(EncodeDefault.Mode.ALWAYS) val dt: String = Instant.now().toString()
-}
+) : Event(_streamName)

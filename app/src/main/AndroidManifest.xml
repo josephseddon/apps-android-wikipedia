@@ -336,6 +336,11 @@
             android:theme="@style/AppTheme" />
 
         <activity
+            android:name=".edit.VisualEditorActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/AppTheme" />
+
+        <activity
             android:name=".page.customize.CustomizeToolbarActivity"
             android:label="@string/customize_toolbar_title"
             android:theme="@style/AppTheme.ActionBar"/>

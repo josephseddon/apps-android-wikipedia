@@ -274,6 +274,12 @@
     <string name="edit_abandon_confirm">The page has been modified. Are you sure you want to exit without saving your changes?</string>
     <string name="edit_abandon_confirm_yes">Yes</string>
     <string name="edit_abandon_confirm_no">No</string>
+    <string name="visual_editor_title">Visual editor</string>
+    <string name="visual_editor_loading_failed">Could not load the editor. Please check your connection and try again.</string>
+    <string name="visual_editor_retry">Retry</string>
+    <string name="visual_editor_edit_saved">Edit published!</string>
+    <string name="visual_editor_refresh_failed">Your edit was saved, but the article could not be refreshed.</string>
+    <string name="visual_editor_refresh_failed_retry">Retry</string>
     <string name="user_blocked_from_editing_title">Blocked</string>
     <string name="user_logged_in_blocked_from_editing" type="id">Your user account has been blocked from editing on this wiki.</string>
     <string name="user_anon_blocked_from_editing" type="id">Your IP address has been blocked from editing.</string>

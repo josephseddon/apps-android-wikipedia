@@ -1049,6 +1049,21 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         scrollTriggerListener.stagedScrollY = stagedScrollY
     }
 
+    fun loadPageAfterEdit(revisionId: Long) {
+        clearActivityActionBarTitle()
+        model.page = null
+        model.readingListPage = null
+        model.forceNetwork = true
+        webView.visibility = View.VISIBLE
+        binding.pageActionsTabLayout.visibility = View.VISIBLE
+        binding.pageActionsTabLayout.enableAllTabs()
+        updateProgressBar(true)
+        pageRefreshed = true
+        references = null
+        revision = 0
+        pageFragmentLoadState.load(pushBackStack = false, revisionId = revisionId)
+    }
+
     fun updateFontSize() {
         webView.settings.defaultFontSize = app.getFontSize().toInt()
     }

@@ -73,7 +73,7 @@ class CommunicationBridge constructor(private val communicationBridgeListener: C
     val isLoading: Boolean
         get() = !(isMetadataReady && isPcsReady)
 
-    fun resetHtml(pageTitle: PageTitle) {
+    fun resetHtml(pageTitle: PageTitle, revisionId: Long = 0) {
         isPcsReady = false
         isMetadataReady = false
         pendingJSMessages.clear()
@@ -81,8 +81,9 @@ class CommunicationBridge constructor(private val communicationBridgeListener: C
         if (communicationBridgeListener.model.shouldLoadAsMobileWeb) {
             communicationBridgeListener.webView.loadUrl(pageTitle.uri)
         } else {
+            val revisionSuffix = if (revisionId > 0) "/$revisionId" else ""
             communicationBridgeListener.webView.loadUrl(ServiceFactory.getRestBasePath(pageTitle.wikiSite) +
-                    RestService.PAGE_HTML_ENDPOINT + UriUtil.encodeURL(pageTitle.prefixedText))
+                    RestService.PAGE_HTML_ENDPOINT + UriUtil.encodeURL(pageTitle.prefixedText) + revisionSuffix)
         }
     }
 

@@ -30,6 +30,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
@@ -46,6 +47,7 @@ import org.wikipedia.commons.FilePageActivity
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.ActivityPageBinding
 import org.wikipedia.dataclient.Service
+import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.donate.CampaignCollection
 import org.wikipedia.dataclient.mwapi.MwQueryPage
@@ -54,12 +56,14 @@ import org.wikipedia.descriptions.DescriptionEditRevertHelpView
 import org.wikipedia.descriptions.DescriptionEditSuccessActivity
 import org.wikipedia.edit.EditHandler
 import org.wikipedia.edit.EditSectionActivity
+import org.wikipedia.edit.VisualEditorActivity
 import org.wikipedia.events.ArticleSavedOrDeletedEvent
 import org.wikipedia.events.ChangeTextSizeEvent
 import org.wikipedia.extensions.parcelableExtra
 import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.language.LangLinksActivity
+import org.wikipedia.login.LoginActivity
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.AnonymousNotificationHelper
 import org.wikipedia.notifications.NotificationActivity
@@ -112,6 +116,58 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     private var exclusiveTooltipRunnable: Runnable? = null
     private var isTooltipShowing = false
 
+    // Pending edit state saved across a login attempt, encapsulated so all fields reset together.
+    // Preserves edit parameters when an anonymous user is redirected to the login flow before
+    // a Visual Editor session can be launched.
+    private data class PendingEditState(val sectionId: Int, val title: PageTitle)
+    private var pendingEdit: PendingEditState? = null
+
+    private fun onVisualEditorResult(resultCode: Int, data: Intent?) {
+        if (resultCode == EditHandler.RESULT_REFRESH_PAGE) {
+            FeedbackUtil.makeSnackbar(this, getString(R.string.visual_editor_edit_saved))
+                .addCallback(object : Snackbar.Callback() {
+                    override fun onDismissed(transientBottomBar: Snackbar, @DismissEvent event: Int) {
+                        if (!isDestroyed) {
+                            AccountUtil.maybeShowTempAccountWelcome(this@PageActivity)
+                        }
+                    }
+                }).show()
+            showEditRefreshInterstitial {
+                val revId = data?.getLongExtra(VisualEditorActivity.EXTRA_REV_ID, 0) ?: 0L
+                val title = pageFragment.model.title ?: return@showEditRefreshInterstitial
+                if (revId > 0L) {
+                    pageFragment.loadPageAfterEdit(revId)
+                } else {
+                    // Revision ID was not provided by VE; fetch the latest revision from the API.
+                    val latestRevId = try {
+                        ServiceFactory.get(title.wikiSite)
+                            .getInfoByPageIdsOrTitles(titles = title.prefixedText)
+                            .query?.firstPage()?.lastrevid ?: 0L
+                    } catch (e: Exception) {
+                        L.e("Failed to fetch latest revision after VE save", e)
+                        0L
+                    }
+                    pageFragment.loadPageAfterEdit(latestRevId)
+                }
+            }
+        }
+    }
+
+    private val requestVisualEditorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        onVisualEditorResult(it.resultCode, it.data)
+    }
+
+    private val requestLoginForVisualEditorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == LoginActivity.RESULT_LOGIN_SUCCESS) {
+            pendingEdit?.let { edit ->
+                requestVisualEditorLauncher.launch(
+                    VisualEditorActivity.newIntent(this, edit.sectionId, edit.title, InvokeSource.PAGE_ACTIVITY)
+                )
+            }
+        }
+        pendingEdit = null
+    }
+
     private val requestEditSectionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == EditHandler.RESULT_REFRESH_PAGE) {
             FeedbackUtil.makeSnackbar(this, getString(R.string.edit_saved_successfully))
@@ -123,10 +179,12 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                     }
                 }).show()
 
-            // and reload the page...
-            pageFragment.model.title?.let { title ->
-                pageFragment.model.curEntry?.let { entry ->
-                    pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
+            showEditRefreshInterstitial {
+                // and reload the page...
+                pageFragment.model.title?.let { title ->
+                    pageFragment.model.curEntry?.let { entry ->
+                        pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
+                    }
                 }
             }
         }
@@ -485,7 +543,16 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     }
 
     override fun onPageRequestEditSection(sectionId: Int, sectionAnchor: String?, title: PageTitle, highlightText: String?) {
-        requestEditSectionLauncher.launch(EditSectionActivity.newIntent(this, sectionId, sectionAnchor, title, InvokeSource.PAGE_ACTIVITY, highlightText))
+        if (AccountUtil.isLoggedIn) {
+            requestVisualEditorLauncher.launch(
+                VisualEditorActivity.newIntent(this, sectionId, title, InvokeSource.PAGE_ACTIVITY)
+            )
+        } else {
+            pendingEdit = PendingEditState(sectionId, title)
+            requestLoginForVisualEditorLauncher.launch(
+                LoginActivity.newIntent(this, LoginActivity.SOURCE_EDIT)
+            )
+        }
     }
 
     override fun onPageRequestLangLinks(title: PageTitle, historyEntryId: Long) {
@@ -695,6 +762,15 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
         binding.pageProgressBar.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
+    private fun showEditRefreshInterstitial(action: suspend () -> Unit) {
+        lifecycleScope.launch {
+            binding.editRefreshInterstitial.visibility = View.VISIBLE
+            delay(EDIT_REFRESH_INTERSTITIAL_DELAY_MS)
+            binding.editRefreshInterstitial.visibility = View.GONE
+            action()
+        }
+    }
+
     private fun hideLinkPreview() {
         ExclusiveBottomSheetPresenter.dismiss(supportFragmentManager)
     }
@@ -841,6 +917,7 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     }
 
     companion object {
+        private const val EDIT_REFRESH_INTERSTITIAL_DELAY_MS = 1_000L
         private const val LANGUAGE_CODE_BUNDLE_KEY = "language"
         private const val EXCEPTION_MESSAGE_WEBVIEW = "webview"
         const val ACTION_LOAD_IN_NEW_TAB = "org.wikipedia.load_in_new_tab"
