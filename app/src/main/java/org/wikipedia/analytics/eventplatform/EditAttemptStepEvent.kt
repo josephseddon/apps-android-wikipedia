@@ -16,6 +16,7 @@ class EditAttemptStepEvent(private val event: EditAttemptStepInteractionEvent) :
 
     companion object {
         const val INTERFACE_WIKITEXT = "wikitext"
+        const val INTERFACE_VISUAL = "visualeditor"
         const val INTERFACE_OTHER = "other"
 
         private const val STREAM_NAME = "eventlogging_EditAttemptStep"

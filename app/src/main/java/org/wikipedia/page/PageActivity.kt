@@ -54,12 +54,14 @@ import org.wikipedia.descriptions.DescriptionEditRevertHelpView
 import org.wikipedia.descriptions.DescriptionEditSuccessActivity
 import org.wikipedia.edit.EditHandler
 import org.wikipedia.edit.EditSectionActivity
+import org.wikipedia.edit.VisualEditorActivity
 import org.wikipedia.events.ArticleSavedOrDeletedEvent
 import org.wikipedia.events.ChangeTextSizeEvent
 import org.wikipedia.extensions.parcelableExtra
 import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.language.LangLinksActivity
+import org.wikipedia.login.LoginActivity
 import org.wikipedia.navtab.NavTab
 import org.wikipedia.notifications.AnonymousNotificationHelper
 import org.wikipedia.notifications.NotificationActivity
@@ -111,6 +113,48 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     private val isCabOpen get() = currentActionModes.isNotEmpty()
     private var exclusiveTooltipRunnable: Runnable? = null
     private var isTooltipShowing = false
+
+    // Pending edit state saved across a login attempt
+    private var pendingEditSectionId: Int = -1
+    private var pendingEditSectionAnchor: String? = null
+    private var pendingEditTitle: PageTitle? = null
+
+    private fun onVisualEditorResult(resultCode: Int, data: Intent?) {
+        if (resultCode == EditHandler.RESULT_REFRESH_PAGE) {
+            FeedbackUtil.makeSnackbar(this, getString(R.string.visual_editor_edit_saved))
+                .addCallback(object : Snackbar.Callback() {
+                    override fun onDismissed(transientBottomBar: Snackbar, @DismissEvent event: Int) {
+                        if (!isDestroyed) {
+                            AccountUtil.maybeShowTempAccountWelcome(this@PageActivity)
+                        }
+                    }
+                }).show()
+            pageFragment.model.title?.let { title ->
+                pageFragment.model.curEntry?.let { entry ->
+                    pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
+                }
+            }
+        }
+    }
+
+    private val requestVisualEditorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        onVisualEditorResult(it.resultCode, it.data)
+    }
+
+    private val requestLoginForVisualEditorLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == LoginActivity.RESULT_LOGIN_SUCCESS) {
+            pendingEditTitle?.let { title ->
+                requestVisualEditorLauncher.launch(
+                    VisualEditorActivity.newIntent(
+                        this, pendingEditSectionId, pendingEditSectionAnchor,
+                        title, InvokeSource.PAGE_ACTIVITY
+                    )
+                )
+            }
+        }
+        pendingEditTitle = null
+        pendingEditSectionAnchor = null
+    }
 
     private val requestEditSectionLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == EditHandler.RESULT_REFRESH_PAGE) {
@@ -485,7 +529,18 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     }
 
     override fun onPageRequestEditSection(sectionId: Int, sectionAnchor: String?, title: PageTitle, highlightText: String?) {
-        requestEditSectionLauncher.launch(EditSectionActivity.newIntent(this, sectionId, sectionAnchor, title, InvokeSource.PAGE_ACTIVITY, highlightText))
+        if (AccountUtil.isLoggedIn) {
+            requestVisualEditorLauncher.launch(
+                VisualEditorActivity.newIntent(this, sectionId, sectionAnchor, title, InvokeSource.PAGE_ACTIVITY)
+            )
+        } else {
+            pendingEditSectionId = sectionId
+            pendingEditSectionAnchor = sectionAnchor
+            pendingEditTitle = title
+            requestLoginForVisualEditorLauncher.launch(
+                LoginActivity.newIntent(this, LoginActivity.SOURCE_EDIT)
+            )
+        }
     }
 
     override fun onPageRequestLangLinks(title: PageTitle, historyEntryId: Long) {
