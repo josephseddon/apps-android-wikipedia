@@ -41,13 +41,13 @@ class PageFragmentLoadState(private var model: PageViewModel,
                             private var leadImagesHandler: LeadImagesHandler,
                             private var currentTab: Tab) {
 
-    fun load(pushBackStack: Boolean) {
+    fun load(pushBackStack: Boolean, revisionId: Long = 0) {
         if (pushBackStack && model.title != null && model.curEntry != null) {
             // update the topmost entry in the backstack, before we start overwriting things.
             updateCurrentBackStackItem()
             currentTab.pushBackStackItem(PageBackStackItem(model.title!!, model.curEntry!!))
         }
-        pageLoad()
+        pageLoad(revisionId)
     }
 
     fun loadFromBackStack() {
@@ -116,7 +116,7 @@ class PageFragmentLoadState(private var model: PageViewModel,
         fragment.onPageLoadError(caught)
     }
 
-    private fun pageLoad() {
+    private fun pageLoad(revisionId: Long = 0) {
         model.title?.let { title ->
             fragment.lifecycleScope.launch(CoroutineExceptionHandler { _, throwable ->
                     L.e("Page details network error: ", throwable)
@@ -130,12 +130,12 @@ class PageFragmentLoadState(private var model: PageViewModel,
                     model.page = null
                     val delayLoadHtml = title.prefixedText.contains(":")
                     if (!delayLoadHtml) {
-                        bridge.resetHtml(title)
+                        bridge.resetHtml(title, revisionId)
                     }
                     if (title.namespace() === Namespace.SPECIAL) {
                         // Short-circuit the entire process of fetching the Summary, since Special: pages
                         // are not supported in RestBase.
-                        bridge.resetHtml(title)
+                        bridge.resetHtml(title, revisionId)
                         leadImagesHandler.loadLeadImage()
                         fragment.requireActivity().invalidateOptionsMenu()
                         fragment.onPageMetadataLoaded()
@@ -197,7 +197,7 @@ class PageFragmentLoadState(private var model: PageViewModel,
                     }
 
                     if (delayLoadHtml) {
-                        bridge.resetHtml(title)
+                        bridge.resetHtml(title, revisionId)
                     }
                     fragment.onPageMetadataLoaded(redirectedFrom)
 

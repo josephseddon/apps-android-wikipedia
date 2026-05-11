@@ -46,6 +46,7 @@ import org.wikipedia.commons.FilePageActivity
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.ActivityPageBinding
 import org.wikipedia.dataclient.Service
+import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.donate.CampaignCollection
 import org.wikipedia.dataclient.mwapi.MwQueryPage
@@ -128,9 +129,22 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                         }
                     }
                 }).show()
-            pageFragment.model.title?.let { title ->
-                pageFragment.model.curEntry?.let { entry ->
-                    pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
+            val revId = data?.getLongExtra(VisualEditorActivity.EXTRA_REV_ID, 0) ?: 0L
+            val title = pageFragment.model.title ?: return
+            if (revId > 0L) {
+                pageFragment.loadPageAfterEdit(revId)
+            } else {
+                // Revision ID was not provided by VE; fetch the latest revision from the API.
+                lifecycleScope.launch {
+                    val latestRevId = try {
+                        ServiceFactory.get(title.wikiSite)
+                            .getInfoByPageIdsOrTitles(titles = title.prefixedText)
+                            .query?.firstPage()?.lastrevid ?: 0L
+                    } catch (e: Exception) {
+                        L.e("Failed to fetch latest revision after VE save", e)
+                        0L
+                    }
+                    pageFragment.loadPageAfterEdit(latestRevId)
                 }
             }
         }
