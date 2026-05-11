@@ -347,7 +347,7 @@ class VisualEditorActivity : BaseActivity() {
         }
 
         private fun injectUrlChangeMonitor(view: WebView?) {
-            // Language: plain ES5 to maximise compatibility with older system WebViews.
+            // Language: plain ES5 to maximize compatibility with older system WebViews.
             // We guard with __veUrlMonitorInstalled so re-injection on retry is idempotent.
             val js = """
                 (function() {
@@ -356,7 +356,7 @@ class VisualEditorActivity : BaseActivity() {
                     var origPush = history.pushState;
                     var origReplace = history.replaceState;
                     function notify(url) {
-                        try { $JS_INTERFACE_NAME.onUrlChanged(url || window.location.href); } catch(e) { console.error('VisualEditorBridge error:', e); }
+                        try { ${JS_INTERFACE_NAME}.onUrlChanged(url || window.location.href); } catch(e) { console.error('VisualEditorBridge error:', e); }
                     }
                     history.pushState = function(s, t, url) {
                         origPush.apply(this, arguments);

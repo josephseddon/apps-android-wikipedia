@@ -116,6 +116,8 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     private var isTooltipShowing = false
 
     // Pending edit state saved across a login attempt, encapsulated so all fields reset together.
+    // Preserves edit parameters when an anonymous user is redirected to the login flow before
+    // a Visual Editor session can be launched.
     private data class PendingEditState(val sectionId: Int, val title: PageTitle)
     private var pendingEdit: PendingEditState? = null
 
