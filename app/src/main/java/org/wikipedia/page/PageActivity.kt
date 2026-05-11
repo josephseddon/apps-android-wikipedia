@@ -30,6 +30,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
@@ -131,13 +132,13 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                         }
                     }
                 }).show()
-            val revId = data?.getLongExtra(VisualEditorActivity.EXTRA_REV_ID, 0) ?: 0L
-            val title = pageFragment.model.title ?: return
-            if (revId > 0L) {
-                pageFragment.loadPageAfterEdit(revId)
-            } else {
-                // Revision ID was not provided by VE; fetch the latest revision from the API.
-                lifecycleScope.launch {
+            showEditRefreshInterstitial {
+                val revId = data?.getLongExtra(VisualEditorActivity.EXTRA_REV_ID, 0) ?: 0L
+                val title = pageFragment.model.title ?: return@showEditRefreshInterstitial
+                if (revId > 0L) {
+                    pageFragment.loadPageAfterEdit(revId)
+                } else {
+                    // Revision ID was not provided by VE; fetch the latest revision from the API.
                     val latestRevId = try {
                         ServiceFactory.get(title.wikiSite)
                             .getInfoByPageIdsOrTitles(titles = title.prefixedText)
@@ -178,10 +179,12 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
                     }
                 }).show()
 
-            // and reload the page...
-            pageFragment.model.title?.let { title ->
-                pageFragment.model.curEntry?.let { entry ->
-                    pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
+            showEditRefreshInterstitial {
+                // and reload the page...
+                pageFragment.model.title?.let { title ->
+                    pageFragment.model.curEntry?.let { entry ->
+                        pageFragment.loadPage(title, entry, pushBackStack = false, squashBackstack = false, isRefresh = true)
+                    }
                 }
             }
         }
@@ -759,6 +762,15 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
         binding.pageProgressBar.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
+    private fun showEditRefreshInterstitial(action: suspend () -> Unit) {
+        lifecycleScope.launch {
+            binding.editRefreshInterstitial.visibility = View.VISIBLE
+            delay(EDIT_REFRESH_INTERSTITIAL_DELAY_MS)
+            binding.editRefreshInterstitial.visibility = View.GONE
+            action()
+        }
+    }
+
     private fun hideLinkPreview() {
         ExclusiveBottomSheetPresenter.dismiss(supportFragmentManager)
     }
@@ -905,6 +917,7 @@ class PageActivity : BaseActivity(), PageFragment.Callback, LinkPreviewDialog.Lo
     }
 
     companion object {
+        private const val EDIT_REFRESH_INTERSTITIAL_DELAY_MS = 1_000L
         private const val LANGUAGE_CODE_BUNDLE_KEY = "language"
         private const val EXCEPTION_MESSAGE_WEBVIEW = "webview"
         const val ACTION_LOAD_IN_NEW_TAB = "org.wikipedia.load_in_new_tab"
