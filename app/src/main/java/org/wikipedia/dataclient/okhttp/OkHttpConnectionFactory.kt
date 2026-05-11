@@ -32,6 +32,7 @@ object OkHttpConnectionFactory {
                 .cache(NET_CACHE)
                 .readTimeout(DEFAULT_READ_TIMEOUT_SEC, TimeUnit.SECONDS)
                 .addInterceptor(UnsuccessfulResponseInterceptor())
+                .addInterceptor(HttpStatusLoggingInterceptor())
                 .addNetworkInterceptor(CacheControlInterceptor())
                 .addInterceptor(CommonHeaderRequestInterceptor())
                 .addInterceptor(DefaultMaxStaleRequestInterceptor())

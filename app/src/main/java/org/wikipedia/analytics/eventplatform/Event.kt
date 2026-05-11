@@ -7,9 +7,10 @@ import kotlinx.serialization.Transient
 // This class MUST be `sealed` for Serialization polymorphism to work automatically.
 @Suppress("unused")
 @Serializable
-sealed class Event(@Transient val stream: String = "") {
-    private val meta = Meta(stream)
-
+sealed class Event(
+    @Transient val stream: String = "",
+    val meta: Meta = Meta(stream)
+) {
     @Serializable
-    private class Meta(val stream: String)
+    class Meta(val stream: String)
 }
