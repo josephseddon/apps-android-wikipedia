@@ -266,7 +266,6 @@ class VisualEditorActivity : BaseActivity() {
 
     companion object {
         const val EXTRA_SECTION_ID = "sectionId"
-        const val EXTRA_SECTION_ANCHOR = "sectionAnchor"
         const val EXTRA_REV_ID = "revId"
         const val SECTION_WHOLE_ARTICLE = -1
         private const val LOAD_TIMEOUT_MS = 30_000L
@@ -281,7 +280,6 @@ class VisualEditorActivity : BaseActivity() {
             return Intent(context, VisualEditorActivity::class.java)
                 .putExtra(Constants.ARG_TITLE, title)
                 .putExtra(EXTRA_SECTION_ID, sectionId)
-                .putExtra(EXTRA_SECTION_ANCHOR, sectionAnchor)
                 .putExtra(Constants.INTENT_EXTRA_INVOKE_SOURCE, invokeSource)
         }
     }
