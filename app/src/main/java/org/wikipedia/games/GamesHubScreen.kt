@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
 import org.wikipedia.analytics.eventplatform.WikiGamesEvent
+import org.wikipedia.compose.components.AppButton
+import org.wikipedia.compose.components.WikiCard
 import org.wikipedia.compose.components.error.WikiErrorClickEvents
 import org.wikipedia.compose.components.error.WikiErrorView
 import org.wikipedia.compose.extensions.shimmerEffect
@@ -54,6 +56,7 @@ import org.wikipedia.feed.wikigames.OnThisDayGameCardProgress
 import org.wikipedia.feed.wikigames.OnThisDayGameCardSimple
 import org.wikipedia.feed.wikigames.WikiGame
 import org.wikipedia.games.onthisday.OnThisDayGameArchiveCalendarHelper
+import org.wikipedia.games.wikifamous.WikiFamousCardGameState
 import org.wikipedia.util.DateUtil
 import org.wikipedia.util.UiState
 import java.time.LocalDate
@@ -62,8 +65,12 @@ import java.time.LocalDate
 fun GamesHubScreen(
     viewModel: GamesHubViewModel,
     onThisDayGameUiState: UiState<List<OnThisDayCardGameState>>,
+    wikiFamousGameUiState: UiState<WikiFamousCardGameState>,
+    wikiFamousWebViewGameUiState: UiState<WikiFamousCardGameState>,
     onThisDayGameArchiveCalendarHelper: OnThisDayGameArchiveCalendarHelper,
     onPlay: (LocalDate, OnThisDayGameAction) -> Unit,
+    onPlayWikiFamous: (WikiFamousCardGameState) -> Unit,
+    onPlayWikiFamousWebView: (WikiFamousCardGameState) -> Unit,
     onShowArchive: () -> Unit,
     onShowDisabledMessage: (String) -> Unit,
     languageList: List<String>,
@@ -85,6 +92,8 @@ fun GamesHubScreen(
                 WikiGamesEvent.submit(action = "refresh", activeInterface = "games_hub", langCode = selectedLanguage)
                 isRefreshing = true
                 viewModel.loadOnThisDayGamesPreviews(selectedLanguage)
+                viewModel.loadWikiFamousGameState(selectedLanguage)
+                viewModel.loadWikiFamousWebViewGameState(selectedLanguage)
             },
             isRefreshing = isRefreshing,
             state = state,
@@ -124,6 +133,8 @@ fun GamesHubScreen(
                                 selectedLanguage = langCode
                                 viewModel.selectedLanguage = langCode
                                 viewModel.loadOnThisDayGamesPreviews(selectedLanguage)
+                                viewModel.loadWikiFamousGameState(selectedLanguage)
+                                viewModel.loadWikiFamousWebViewGameState(selectedLanguage)
                                 onThisDayGameArchiveCalendarHelper.updateLanguageCode(selectedLanguage)
                             }
                         )
@@ -188,6 +199,86 @@ fun GamesHubScreen(
                                     }
                                 }
                             }
+
+                            WikiGames.WIKI_FAMOUS -> {
+                                when (wikiFamousGameUiState) {
+                                    is UiState.Loading -> {
+                                        GamesHubLoadingShimmer(transition = transition)
+                                    }
+
+                                    is UiState.Error -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            WikiErrorView(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                caught = wikiFamousGameUiState.error,
+                                                errorClickEvents = WikiErrorClickEvents {
+                                                    viewModel.loadWikiFamousGameState(selectedLanguage)
+                                                },
+                                                retryForGenericError = true
+                                            )
+                                        }
+                                    }
+
+                                    is UiState.Success -> {
+                                        if (WikiGames.WIKI_FAMOUS.isLangSupported(selectedLanguage)) {
+                                            WikiFamousGameCard(
+                                                titleText = LocalContext.current.getString(selectedLanguage, WikiGames.entries[index].titleRes),
+                                                descriptionText = stringResource(R.string.wiki_famous_game_description),
+                                                gameState = wikiFamousGameUiState.data,
+                                                onPlayClick = {
+                                                    WikiGamesEvent.submit(action = "play_click", activeInterface = "games_hub", cardType = "today", langCode = selectedLanguage)
+                                                    onPlayWikiFamous(wikiFamousGameUiState.data)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            WikiGames.WIKI_FAMOUS_WEBVIEW -> {
+                                when (wikiFamousWebViewGameUiState) {
+                                    is UiState.Loading -> {
+                                        GamesHubLoadingShimmer(transition = transition)
+                                    }
+
+                                    is UiState.Error -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            WikiErrorView(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                caught = wikiFamousWebViewGameUiState.error,
+                                                errorClickEvents = WikiErrorClickEvents {
+                                                    viewModel.loadWikiFamousWebViewGameState(selectedLanguage)
+                                                },
+                                                retryForGenericError = true
+                                            )
+                                        }
+                                    }
+
+                                    is UiState.Success -> {
+                                        if (WikiGames.WIKI_FAMOUS_WEBVIEW.isLangSupported(selectedLanguage)) {
+                                            WikiFamousGameCard(
+                                                titleText = LocalContext.current.getString(selectedLanguage, WikiGames.entries[index].titleRes),
+                                                descriptionText = stringResource(R.string.wiki_famous_webview_game_description),
+                                                gameState = wikiFamousWebViewGameUiState.data,
+                                                onPlayClick = {
+                                                    WikiGamesEvent.submit(action = "play_click", activeInterface = "games_hub", cardType = "today", langCode = selectedLanguage)
+                                                    onPlayWikiFamousWebView(wikiFamousWebViewGameUiState.data)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -240,7 +331,7 @@ fun GamesHubLanguageChip(
     onSelected: () -> Unit,
 ) {
     val langText = WikipediaApp.instance.languageState.getAppLanguageLocalizedName(langCode) ?: langCode
-    val isEnabled = WikiGames.WHICH_CAME_FIRST.isLangSupported(langCode) // TODO: Add check for other games when they are added
+    val isEnabled = WikiGames.entries.any { it.isLangSupported(langCode) }
     val textColor = if (isEnabled) WikipediaTheme.colors.primaryColor else WikipediaTheme.colors.inactiveColor
     val snackbarMessage = stringResource(R.string.games_hub_activity_games_unavailable_message)
     FilterChip(
@@ -421,6 +512,59 @@ fun OnThisDayGameCardContent(
                     onCountDownFinished = {
                         onThisDayGameAction(OnThisDayGameAction.CountdownFinished) }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun WikiFamousGameCard(
+    titleText: String,
+    descriptionText: String,
+    gameState: WikiFamousCardGameState,
+    onPlayClick: () -> Unit
+) {
+    val (statusText, buttonText) = when (gameState) {
+        is WikiFamousCardGameState.NotPlayed -> null to stringResource(R.string.wiki_famous_game_play_today_btn_text)
+        is WikiFamousCardGameState.InProgress -> stringResource(
+            R.string.wiki_famous_game_current_progress_message,
+            gameState.currentQuestion + 1
+        ) to stringResource(R.string.wiki_famous_game_continue_btn_text)
+        is WikiFamousCardGameState.Completed -> stringResource(
+            R.string.wiki_famous_game_score_message,
+            gameState.score
+        ) to stringResource(R.string.wiki_famous_game_review_results_btn_text)
+    }
+
+    WikiCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        onClick = onPlayClick
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = titleText,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Medium,
+                color = WikipediaTheme.colors.primaryColor
+            )
+            Text(
+                text = descriptionText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = WikipediaTheme.colors.secondaryColor,
+                modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+            )
+            statusText?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WikipediaTheme.colors.progressiveColor,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+            AppButton(onClick = onPlayClick, modifier = Modifier.fillMaxWidth()) {
+                Text(buttonText)
             }
         }
     }
