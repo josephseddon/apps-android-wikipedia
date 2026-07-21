@@ -112,7 +112,8 @@ object Constants {
         SUGGESTED_EDITS_RECENT_EDITS("suggestedEditsRecentEdits"),
         ON_THIS_DAY_GAME_ACTIVITY("onThisDayGame"),
         ACTIVITY_TAB("activityTab"),
-        GAMES_HUB("gamesHub")
+        GAMES_HUB("gamesHub"),
+        WIKI_FAMOUS_GAME_ACTIVITY("wikiFamousGame")
     }
 
     enum class ImageEditType(name: String) {

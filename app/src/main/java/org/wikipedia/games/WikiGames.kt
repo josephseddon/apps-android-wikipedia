@@ -10,6 +10,10 @@ enum class WikiGames(
     WHICH_CAME_FIRST(
         titleRes = R.string.on_this_day_game_title,
         baseLanguages = listOf("en", "de", "fr", "es", "pt", "ru", "ar", "tr", "zh")
+    ),
+    WIKI_FAMOUS(
+        titleRes = R.string.wiki_famous_game_title,
+        baseLanguages = listOf("en", "de", "fr", "es", "pt", "ru", "ar", "tr", "zh")
     );
 
     val supportLanguages: List<String> by lazy {

@@ -224,6 +224,11 @@ interface Service {
         @Query("grnlimit") count: Int = 10,
     ): MwQueryResponse
 
+    @GET(MW_API_PREFIX + "action=query&generator=random&redirects=1&grnnamespace=0&prop=extracts|pageimages|pageviews&exintro=1&explaintext=1&exchars=400&piprop=thumbnail&pithumbsize=" + PREFERRED_THUMB_SIZE + "&pvipdays=30")
+    suspend fun getRandomArticlesWithViews(
+        @Query("grnlimit") count: Int = 10,
+    ): MwQueryResponse
+
     @Headers("Cache-Control: no-cache")
     @GET(MW_API_PREFIX + "action=query&list=recentchanges&rcprop=title|timestamp|ids|oresscores|sizes|tags|user|parsedcomment|comment|flags&rcnamespace=0&rctype=edit|new")
     suspend fun getRecentEdits(

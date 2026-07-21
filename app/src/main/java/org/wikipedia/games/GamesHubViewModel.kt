@@ -13,6 +13,8 @@ import org.wikipedia.WikipediaApp
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.wikigames.OnThisDayCardGameState
 import org.wikipedia.games.onthisday.OnThisDayGameProvider
+import org.wikipedia.games.wikifamous.WikiFamousCardGameState
+import org.wikipedia.games.wikifamous.WikiFamousGameProvider
 import org.wikipedia.util.UiState
 import java.time.LocalDate
 
@@ -20,12 +22,16 @@ class GamesHubViewModel : ViewModel() {
     private val _onThisDayGameUiState = MutableStateFlow<UiState<List<OnThisDayCardGameState>>>(UiState.Loading)
     val onThisDayGameUiState: StateFlow<UiState<List<OnThisDayCardGameState>>> = _onThisDayGameUiState.asStateFlow()
 
+    private val _wikiFamousGameUiState = MutableStateFlow<UiState<WikiFamousCardGameState>>(UiState.Loading)
+    val wikiFamousGameUiState: StateFlow<UiState<WikiFamousCardGameState>> = _wikiFamousGameUiState.asStateFlow()
+
     var selectedLanguage: String = WikipediaApp.instance.languageState.appLanguageCodes.first {
         WikiGames.WHICH_CAME_FIRST.isLangSupported(it)
     }
 
     init {
         loadOnThisDayGamesPreviews(selectedLanguage)
+        loadWikiFamousGameState(selectedLanguage)
     }
 
     fun loadOnThisDayGamesPreviews(langCode: String) {
@@ -45,6 +51,20 @@ class GamesHubViewModel : ViewModel() {
                 }
             }.awaitAll()
             _onThisDayGameUiState.value = UiState.Success(gamesList)
+        }
+    }
+
+    fun loadWikiFamousGameState(langCode: String) {
+        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
+            _wikiFamousGameUiState.value = UiState.Error(throwable)
+        }) {
+            _wikiFamousGameUiState.value = UiState.Loading
+            if (!WikiGames.WIKI_FAMOUS.isLangSupported(langCode)) {
+                _wikiFamousGameUiState.value = UiState.Success(WikiFamousCardGameState.NotPlayed)
+                return@launch
+            }
+            val wikiSite = WikiSite.forLanguageCode(langCode)
+            _wikiFamousGameUiState.value = UiState.Success(WikiFamousGameProvider.getGameState(wikiSite, LocalDate.now()))
         }
     }
 }

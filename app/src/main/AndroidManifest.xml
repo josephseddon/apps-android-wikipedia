@@ -387,6 +387,9 @@
             android:name=".games.onthisday.OnThisDayGameActivity"/>
 
         <activity
+            android:name=".games.wikifamous.WikiFamousGameActivity"/>
+
+        <activity
             android:name=".games.GamesHubActivity"/>
 
         <activity

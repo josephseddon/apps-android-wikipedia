@@ -22,6 +22,7 @@ import org.wikipedia.feed.wikigames.OnThisDayGameAction
 import org.wikipedia.games.db.DailyGameHistory
 import org.wikipedia.games.onthisday.OnThisDayGameActivity
 import org.wikipedia.games.onthisday.OnThisDayGameArchiveCalendarHelper
+import org.wikipedia.games.wikifamous.WikiFamousGameActivity
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.UriUtil
 
@@ -29,6 +30,9 @@ class GamesHubFragment : Fragment() {
     private lateinit var onThisDayGameArchiveCalendarHelper: OnThisDayGameArchiveCalendarHelper
     private val launchOnThisDayGameActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.loadOnThisDayGamesPreviews(viewModel.selectedLanguage)
+    }
+    private val launchWikiFamousGameActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        viewModel.loadWikiFamousGameState(viewModel.selectedLanguage)
     }
 
     val viewModel: GamesHubViewModel by viewModels()
@@ -66,6 +70,7 @@ class GamesHubFragment : Fragment() {
                         GamesHubScreen(
                             viewModel = viewModel,
                             onThisDayGameUiState = viewModel.onThisDayGameUiState.collectAsState().value,
+                            wikiFamousGameUiState = viewModel.wikiFamousGameUiState.collectAsState().value,
                             onThisDayGameArchiveCalendarHelper = onThisDayGameArchiveCalendarHelper,
                             onPlay = { gameDate, gameStatus ->
                                 launchOnThisDayGameActivity.launch(
@@ -76,6 +81,15 @@ class GamesHubFragment : Fragment() {
                                         date = gameDate,
                                         gameStatus = if (gameStatus == OnThisDayGameAction.ReviewResults)
                                             DailyGameHistory.GAME_COMPLETED else DailyGameHistory.GAME_IN_PROGRESS
+                                    )
+                                )
+                            },
+                            onPlayWikiFamous = {
+                                launchWikiFamousGameActivity.launch(
+                                    WikiFamousGameActivity.newIntent(
+                                        context = activity,
+                                        invokeSource = InvokeSource.GAMES_HUB,
+                                        wikiSite = WikiSite.forLanguageCode(viewModel.selectedLanguage)
                                     )
                                 )
                             },
