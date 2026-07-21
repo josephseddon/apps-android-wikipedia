@@ -23,6 +23,7 @@ import org.wikipedia.games.db.DailyGameHistory
 import org.wikipedia.games.onthisday.OnThisDayGameActivity
 import org.wikipedia.games.onthisday.OnThisDayGameArchiveCalendarHelper
 import org.wikipedia.games.wikifamous.WikiFamousGameActivity
+import org.wikipedia.games.wikifamous.webview.WikiFamousWebViewGameActivity
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.UriUtil
 
@@ -33,6 +34,9 @@ class GamesHubFragment : Fragment() {
     }
     private val launchWikiFamousGameActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         viewModel.loadWikiFamousGameState(viewModel.selectedLanguage)
+    }
+    private val launchWikiFamousWebViewGameActivity = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        viewModel.loadWikiFamousWebViewGameState(viewModel.selectedLanguage)
     }
 
     val viewModel: GamesHubViewModel by viewModels()
@@ -71,6 +75,7 @@ class GamesHubFragment : Fragment() {
                             viewModel = viewModel,
                             onThisDayGameUiState = viewModel.onThisDayGameUiState.collectAsState().value,
                             wikiFamousGameUiState = viewModel.wikiFamousGameUiState.collectAsState().value,
+                            wikiFamousWebViewGameUiState = viewModel.wikiFamousWebViewGameUiState.collectAsState().value,
                             onThisDayGameArchiveCalendarHelper = onThisDayGameArchiveCalendarHelper,
                             onPlay = { gameDate, gameStatus ->
                                 launchOnThisDayGameActivity.launch(
@@ -87,6 +92,15 @@ class GamesHubFragment : Fragment() {
                             onPlayWikiFamous = {
                                 launchWikiFamousGameActivity.launch(
                                     WikiFamousGameActivity.newIntent(
+                                        context = activity,
+                                        invokeSource = InvokeSource.GAMES_HUB,
+                                        wikiSite = WikiSite.forLanguageCode(viewModel.selectedLanguage)
+                                    )
+                                )
+                            },
+                            onPlayWikiFamousWebView = {
+                                launchWikiFamousWebViewGameActivity.launch(
+                                    WikiFamousWebViewGameActivity.newIntent(
                                         context = activity,
                                         invokeSource = InvokeSource.GAMES_HUB,
                                         wikiSite = WikiSite.forLanguageCode(viewModel.selectedLanguage)

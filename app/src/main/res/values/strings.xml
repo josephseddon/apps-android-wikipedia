@@ -1977,6 +1977,8 @@
     <string name="on_this_day_game_stats_log_in_prompt_card_description">See your streaks, scores, and more</string>
     <string name="wiki_famous_game_title">Wiki Famous</string>
     <string name="wiki_famous_game_description">Guess which Wikipedia article is more popular</string>
+    <string name="wiki_famous_webview_game_title">Wiki Famous (WebView)</string>
+    <string name="wiki_famous_webview_game_description">Guess which Wikipedia article is more popular — WebView version</string>
     <string name="wiki_famous_game_splash_message">Which article got more page views in the last 30 days?</string>
     <string name="wiki_famous_game_round_label">Round %1$d of %2$d</string>
     <string name="wiki_famous_game_score_label">Score</string>

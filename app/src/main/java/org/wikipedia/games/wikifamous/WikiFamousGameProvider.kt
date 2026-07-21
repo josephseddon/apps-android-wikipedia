@@ -30,9 +30,9 @@ object WikiFamousGameProvider {
             .map { (first, second) -> WikiFamousRound(article1 = first, article2 = second) }
     }
 
-    suspend fun getGameState(wikiSite: WikiSite, date: LocalDate): WikiFamousCardGameState {
+    suspend fun getGameState(wikiSite: WikiSite, date: LocalDate, game: WikiGames = WikiGames.WIKI_FAMOUS): WikiFamousCardGameState {
         val gameHistory = AppDatabase.instance.dailyGameHistoryDao().findGameHistoryByDate(
-            gameName = WikiGames.WIKI_FAMOUS.ordinal,
+            gameName = game.ordinal,
             language = wikiSite.languageCode,
             year = date.year,
             month = date.monthValue,

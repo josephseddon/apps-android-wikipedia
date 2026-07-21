@@ -66,9 +66,11 @@ fun GamesHubScreen(
     viewModel: GamesHubViewModel,
     onThisDayGameUiState: UiState<List<OnThisDayCardGameState>>,
     wikiFamousGameUiState: UiState<WikiFamousCardGameState>,
+    wikiFamousWebViewGameUiState: UiState<WikiFamousCardGameState>,
     onThisDayGameArchiveCalendarHelper: OnThisDayGameArchiveCalendarHelper,
     onPlay: (LocalDate, OnThisDayGameAction) -> Unit,
     onPlayWikiFamous: (WikiFamousCardGameState) -> Unit,
+    onPlayWikiFamousWebView: (WikiFamousCardGameState) -> Unit,
     onShowArchive: () -> Unit,
     onShowDisabledMessage: (String) -> Unit,
     languageList: List<String>,
@@ -91,6 +93,7 @@ fun GamesHubScreen(
                 isRefreshing = true
                 viewModel.loadOnThisDayGamesPreviews(selectedLanguage)
                 viewModel.loadWikiFamousGameState(selectedLanguage)
+                viewModel.loadWikiFamousWebViewGameState(selectedLanguage)
             },
             isRefreshing = isRefreshing,
             state = state,
@@ -131,6 +134,7 @@ fun GamesHubScreen(
                                 viewModel.selectedLanguage = langCode
                                 viewModel.loadOnThisDayGamesPreviews(selectedLanguage)
                                 viewModel.loadWikiFamousGameState(selectedLanguage)
+                                viewModel.loadWikiFamousWebViewGameState(selectedLanguage)
                                 onThisDayGameArchiveCalendarHelper.updateLanguageCode(selectedLanguage)
                             }
                         )
@@ -224,10 +228,51 @@ fun GamesHubScreen(
                                         if (WikiGames.WIKI_FAMOUS.isLangSupported(selectedLanguage)) {
                                             WikiFamousGameCard(
                                                 titleText = LocalContext.current.getString(selectedLanguage, WikiGames.entries[index].titleRes),
+                                                descriptionText = stringResource(R.string.wiki_famous_game_description),
                                                 gameState = wikiFamousGameUiState.data,
                                                 onPlayClick = {
                                                     WikiGamesEvent.submit(action = "play_click", activeInterface = "games_hub", cardType = "today", langCode = selectedLanguage)
                                                     onPlayWikiFamous(wikiFamousGameUiState.data)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            WikiGames.WIKI_FAMOUS_WEBVIEW -> {
+                                when (wikiFamousWebViewGameUiState) {
+                                    is UiState.Loading -> {
+                                        GamesHubLoadingShimmer(transition = transition)
+                                    }
+
+                                    is UiState.Error -> {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            WikiErrorView(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                caught = wikiFamousWebViewGameUiState.error,
+                                                errorClickEvents = WikiErrorClickEvents {
+                                                    viewModel.loadWikiFamousWebViewGameState(selectedLanguage)
+                                                },
+                                                retryForGenericError = true
+                                            )
+                                        }
+                                    }
+
+                                    is UiState.Success -> {
+                                        if (WikiGames.WIKI_FAMOUS_WEBVIEW.isLangSupported(selectedLanguage)) {
+                                            WikiFamousGameCard(
+                                                titleText = LocalContext.current.getString(selectedLanguage, WikiGames.entries[index].titleRes),
+                                                descriptionText = stringResource(R.string.wiki_famous_webview_game_description),
+                                                gameState = wikiFamousWebViewGameUiState.data,
+                                                onPlayClick = {
+                                                    WikiGamesEvent.submit(action = "play_click", activeInterface = "games_hub", cardType = "today", langCode = selectedLanguage)
+                                                    onPlayWikiFamousWebView(wikiFamousWebViewGameUiState.data)
                                                 }
                                             )
                                         }
@@ -475,6 +520,7 @@ fun OnThisDayGameCardContent(
 @Composable
 fun WikiFamousGameCard(
     titleText: String,
+    descriptionText: String,
     gameState: WikiFamousCardGameState,
     onPlayClick: () -> Unit
 ) {
@@ -504,7 +550,7 @@ fun WikiFamousGameCard(
                 color = WikipediaTheme.colors.primaryColor
             )
             Text(
-                text = stringResource(R.string.wiki_famous_game_description),
+                text = descriptionText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = WikipediaTheme.colors.secondaryColor,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)

@@ -14,6 +14,10 @@ enum class WikiGames(
     WIKI_FAMOUS(
         titleRes = R.string.wiki_famous_game_title,
         baseLanguages = listOf("en", "de", "fr", "es", "pt", "ru", "ar", "tr", "zh")
+    ),
+    WIKI_FAMOUS_WEBVIEW(
+        titleRes = R.string.wiki_famous_webview_game_title,
+        baseLanguages = listOf("en", "de", "fr", "es", "pt", "ru", "ar", "tr", "zh")
     );
 
     val supportLanguages: List<String> by lazy {

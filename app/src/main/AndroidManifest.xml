@@ -390,6 +390,9 @@
             android:name=".games.wikifamous.WikiFamousGameActivity"/>
 
         <activity
+            android:name=".games.wikifamous.webview.WikiFamousWebViewGameActivity"/>
+
+        <activity
             android:name=".games.GamesHubActivity"/>
 
         <activity

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.wikipedia.Constants
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.WikiSite
@@ -26,6 +27,7 @@ class WikiFamousGameViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
 
     val invokeSource = savedStateHandle.get<Constants.InvokeSource>(Constants.INTENT_EXTRA_INVOKE_SOURCE)!!
     val wikiSite = savedStateHandle.get<WikiSite>(Constants.ARG_WIKISITE)!!
+    val game: WikiGames = savedStateHandle.get<Int>(EXTRA_GAME_ORDINAL)?.let { WikiGames.entries[it] } ?: WikiGames.WIKI_FAMOUS
 
     private val _uiState = MutableStateFlow<UiState<GameState>>(UiState.Loading)
     val uiState: StateFlow<UiState<GameState>> = _uiState.asStateFlow()
@@ -46,7 +48,7 @@ class WikiFamousGameViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
             _uiState.value = UiState.Loading
 
             val gameHistory = AppDatabase.instance.dailyGameHistoryDao().findGameHistoryByDate(
-                gameName = WikiGames.WIKI_FAMOUS.ordinal,
+                gameName = game.ordinal,
                 language = wikiSite.languageCode,
                 year = currentDate.year,
                 month = currentDate.monthValue,
@@ -125,7 +127,7 @@ class WikiFamousGameViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         viewModelScope.launch(CoroutineExceptionHandler { _, throwable -> L.e(throwable) }) {
             val dailyGameHistory = DailyGameHistory(
                 id = currentGameId ?: 0,
-                gameName = WikiGames.WIKI_FAMOUS.ordinal,
+                gameName = game.ordinal,
                 language = wikiSite.languageCode,
                 year = currentDate.year,
                 month = currentDate.monthValue,
@@ -141,6 +143,7 @@ class WikiFamousGameViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         }
     }
 
+    @Serializable
     data class GameState(
         val rounds: List<WikiFamousRound>,
         val currentRoundIndex: Int = 0,
@@ -153,30 +156,31 @@ class WikiFamousGameViewModel(savedStateHandle: SavedStateHandle) : ViewModel() 
         const val WRONG_POINTS = -3
         const val SPEED_BONUS_POINTS = 5
         const val SPEED_BONUS_WINDOW_MS = 3000L
+        const val EXTRA_GAME_ORDINAL = "gameOrdinal"
 
-        suspend fun getGameStatistics(wikiSite: WikiSite): WikiFamousGameStatistics {
+        suspend fun getGameStatistics(wikiSite: WikiSite, game: WikiGames = WikiGames.WIKI_FAMOUS): WikiFamousGameStatistics {
             return withContext(Dispatchers.IO) {
                 val totalGamesPlayed = async {
                     AppDatabase.instance.dailyGameHistoryDao().getTotalGamesPlayed(
-                        gameName = WikiGames.WIKI_FAMOUS.ordinal,
+                        gameName = game.ordinal,
                         language = wikiSite.languageCode
                     )
                 }
                 val averageScore = async {
                     AppDatabase.instance.dailyGameHistoryDao().getAverageScore(
-                        gameName = WikiGames.WIKI_FAMOUS.ordinal,
+                        gameName = game.ordinal,
                         language = wikiSite.languageCode
                     )
                 }
                 val currentStreak = async {
                     AppDatabase.instance.dailyGameHistoryDao().getCurrentStreak(
-                        gameName = WikiGames.WIKI_FAMOUS.ordinal,
+                        gameName = game.ordinal,
                         language = wikiSite.languageCode
                     )
                 }
                 val bestStreak = async {
                     AppDatabase.instance.dailyGameHistoryDao().getBestStreak(
-                        gameName = WikiGames.WIKI_FAMOUS.ordinal,
+                        gameName = game.ordinal,
                         language = wikiSite.languageCode
                     )
                 }

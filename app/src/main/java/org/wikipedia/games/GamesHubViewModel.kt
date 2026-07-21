@@ -25,6 +25,9 @@ class GamesHubViewModel : ViewModel() {
     private val _wikiFamousGameUiState = MutableStateFlow<UiState<WikiFamousCardGameState>>(UiState.Loading)
     val wikiFamousGameUiState: StateFlow<UiState<WikiFamousCardGameState>> = _wikiFamousGameUiState.asStateFlow()
 
+    private val _wikiFamousWebViewGameUiState = MutableStateFlow<UiState<WikiFamousCardGameState>>(UiState.Loading)
+    val wikiFamousWebViewGameUiState: StateFlow<UiState<WikiFamousCardGameState>> = _wikiFamousWebViewGameUiState.asStateFlow()
+
     var selectedLanguage: String = WikipediaApp.instance.languageState.appLanguageCodes.first {
         WikiGames.WHICH_CAME_FIRST.isLangSupported(it)
     }
@@ -32,6 +35,7 @@ class GamesHubViewModel : ViewModel() {
     init {
         loadOnThisDayGamesPreviews(selectedLanguage)
         loadWikiFamousGameState(selectedLanguage)
+        loadWikiFamousWebViewGameState(selectedLanguage)
     }
 
     fun loadOnThisDayGamesPreviews(langCode: String) {
@@ -65,6 +69,22 @@ class GamesHubViewModel : ViewModel() {
             }
             val wikiSite = WikiSite.forLanguageCode(langCode)
             _wikiFamousGameUiState.value = UiState.Success(WikiFamousGameProvider.getGameState(wikiSite, LocalDate.now()))
+        }
+    }
+
+    fun loadWikiFamousWebViewGameState(langCode: String) {
+        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
+            _wikiFamousWebViewGameUiState.value = UiState.Error(throwable)
+        }) {
+            _wikiFamousWebViewGameUiState.value = UiState.Loading
+            if (!WikiGames.WIKI_FAMOUS_WEBVIEW.isLangSupported(langCode)) {
+                _wikiFamousWebViewGameUiState.value = UiState.Success(WikiFamousCardGameState.NotPlayed)
+                return@launch
+            }
+            val wikiSite = WikiSite.forLanguageCode(langCode)
+            _wikiFamousWebViewGameUiState.value = UiState.Success(
+                WikiFamousGameProvider.getGameState(wikiSite, LocalDate.now(), WikiGames.WIKI_FAMOUS_WEBVIEW)
+            )
         }
     }
 }

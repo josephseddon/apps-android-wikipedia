@@ -52,6 +52,7 @@ import org.wikipedia.compose.components.error.WikiErrorView
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
 import org.wikipedia.dataclient.WikiSite
+import org.wikipedia.games.WikiGames
 import org.wikipedia.games.db.DailyGameHistory
 import org.wikipedia.theme.Theme
 import org.wikipedia.util.UiState
@@ -95,6 +96,7 @@ fun WikiFamousGameScreen(
                         WikiFamousResultsScreen(
                             state = state,
                             wikiSite = viewModel.wikiSite,
+                            game = viewModel.game,
                             onReadArticle = onReadArticle,
                             onDone = onBackClick
                         )
@@ -284,11 +286,12 @@ fun WikiFamousResultsScreen(
     state: WikiFamousGameViewModel.GameState,
     wikiSite: WikiSite,
     onReadArticle: (String) -> Unit,
-    onDone: () -> Unit
+    onDone: () -> Unit,
+    game: WikiGames = WikiGames.WIKI_FAMOUS
 ) {
     var stats by remember { mutableStateOf<WikiFamousGameStatistics?>(null) }
-    LaunchedEffect(Unit) {
-        stats = WikiFamousGameViewModel.getGameStatistics(wikiSite)
+    LaunchedEffect(game) {
+        stats = WikiFamousGameViewModel.getGameStatistics(wikiSite, game)
     }
 
     val correctCount = state.rounds.count { it.answeredCorrectly == true }
