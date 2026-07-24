@@ -118,16 +118,28 @@ class SummaryFallbackInterceptor : Interceptor {
         }
     }
 
+    /**
+     * Picks the section to show a definition from the same way Wiktionary's own
+     * [MediaWiki:Gadget-PagePreviews.js](https://en.wiktionary.org/wiki/MediaWiki:Gadget-PagePreviews.js)
+     * does when a preview isn't anchored to a specific language section: prefer English, then
+     * Chinese, then Translingual, then whichever section comes first on the page (the response
+     * map preserves page order, so the first entry is the first section).
+     */
     private fun fetchFirstDefinition(scheme: String, host: String, title: String): String? {
         return try {
             val defUrl = "$scheme://$host/api/rest_v1/page/definition/${UriUtil.encodeURL(title)}"
             val defJson = executeSync(defUrl) ?: return null
             val usagesByLang = JsonUtil.decodeFromString<Map<String, List<RbDefinition.Usage>>>(defJson) ?: return null
-            usagesByLang.values.asSequence()
-                .flatten()
-                .flatMap { it.definitions.asSequence() }
-                .map { it.definition.replace(HTML_TAG_REGEX, "").trim() }
-                .firstOrNull { it.isNotEmpty() }
+            val usageGroups = usagesByLang.values.filter { it.isNotEmpty() }
+
+            val preferredGroup = PREFERRED_LANGUAGES.asSequence()
+                .mapNotNull { preferred -> usageGroups.firstOrNull { group -> group.any { it.language == preferred } } }
+                .firstOrNull() ?: usageGroups.firstOrNull()
+
+            preferredGroup?.asSequence()
+                ?.flatMap { it.definitions.asSequence() }
+                ?.map { it.definition.replace(HTML_TAG_REGEX, "").trim() }
+                ?.firstOrNull { it.isNotEmpty() }
         } catch (e: Exception) {
             L.e(e)
             null
@@ -146,6 +158,7 @@ class SummaryFallbackInterceptor : Interceptor {
 
     companion object {
         private val HTML_TAG_REGEX = Regex("<[^>]*>")
+        private val PREFERRED_LANGUAGES = listOf("English", "Chinese", "Translingual")
 
         // Deliberately independent of OkHttpConnectionFactory.client: these fallback calls are
         // synchronous and made from inside an interceptor for that same client, so sharing its

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 class RbDefinition {
 
     @Serializable
-    class Usage(val partOfSpeech: String = "", val definitions: List<Definition>)
+    class Usage(val partOfSpeech: String = "", val language: String = "", val definitions: List<Definition>)
 
     @Serializable
     class Definition(val definition: String = "", val examples: List<String>? = null)
