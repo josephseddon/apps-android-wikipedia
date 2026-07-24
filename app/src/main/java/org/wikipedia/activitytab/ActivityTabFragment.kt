@@ -733,7 +733,7 @@ class ActivityTabFragment : Fragment() {
     @Preview
     @Composable
     fun ActivityTabScreenPreview() {
-        val site = WikiSite("https://en.wikipedia.org/".toUri(), "en")
+        val site = WikiSite("https://en.wiktionary.org/".toUri(), "en")
         BaseTheme(currentTheme = Theme.LIGHT) {
             ActivityTabScreen(
                 isLoggedIn = true,
