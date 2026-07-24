@@ -10,6 +10,7 @@ import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.mainpage.MainPageClient
 import org.wikipedia.feed.random.RandomClient
+import org.wikipedia.feed.wotd.WordOfTheDayClient
 import org.wikipedia.model.EnumCode
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
@@ -62,6 +63,11 @@ enum class FeedContentType(private val code: Int,
     ACCESSIBILITY(10, 0, 0, false, false) {
         override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
             return if (DeviceUtil.isAccessibilityEnabled) AccessibilityCardClient() else null
+        }
+    },
+    WORD_OF_THE_DAY(11, R.string.view_word_of_the_day_card_title, R.string.feed_item_type_word_of_the_day, true) {
+        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+            return if (isEnabled) WordOfTheDayClient(coroutineScope) else null
         }
     };
 

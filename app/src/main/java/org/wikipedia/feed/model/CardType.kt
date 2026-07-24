@@ -18,6 +18,7 @@ import org.wikipedia.feed.random.RandomCardView
 import org.wikipedia.feed.searchbar.SearchCardView
 import org.wikipedia.feed.topread.TopReadCardView
 import org.wikipedia.feed.view.FeedCardView
+import org.wikipedia.feed.wotd.WordOfTheDayCardView
 import org.wikipedia.model.EnumCode
 
 enum class CardType(
@@ -97,6 +98,11 @@ enum class CardType(
     ACCESSIBILITY(22, FeedContentType.ACCESSIBILITY) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AccessibilityCardView(ctx)
+        }
+    },
+    WORD_OF_THE_DAY(25, FeedContentType.WORD_OF_THE_DAY) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return WordOfTheDayCardView(ctx)
         }
     },
     DAY_HEADER(97) {
