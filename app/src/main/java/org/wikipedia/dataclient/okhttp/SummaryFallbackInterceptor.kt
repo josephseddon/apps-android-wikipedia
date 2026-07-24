@@ -185,6 +185,18 @@ class SummaryFallbackInterceptor : Interceptor {
             val builder = OkHttpClient.Builder()
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
+                // Wikimedia's API gateway 403s requests without a descriptive User-Agent (the
+                // default OkHttp one gets treated as unidentified bot traffic). The main client
+                // gets this from CommonHeaderRequestInterceptor; this client is independent of
+                // that one, so it needs its own copy.
+                .addInterceptor { chain ->
+                    chain.proceed(
+                        chain.request().newBuilder()
+                            .header("User-Agent", WikipediaApp.instance.userAgent)
+                            .header("X-WMF-UUID", WikipediaApp.instance.appInstallID)
+                            .build()
+                    )
+                }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
                 try {
                     val certFactory = CertificateFactory.getInstance("X.509")
