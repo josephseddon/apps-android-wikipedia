@@ -30,7 +30,7 @@ class StandardSearchRepository : SearchRepository<StandardSearchResults> {
         var lastXSearchIdFullText: String? = null
 
         if (isPrefixSearch) {
-            if (searchTerm.length >= 2 && invokeSource != Constants.InvokeSource.PLACES) {
+            if (searchTerm.length >= 2) {
                 withContext(Dispatchers.IO) {
                     listOf(async {
                         getSearchResultsFromTabs(wikiSite, searchTerm)
@@ -49,7 +49,7 @@ class StandardSearchRepository : SearchRepository<StandardSearchResults> {
             currentContinuation = 0
         }
 
-        resultList.addAll(SearchResultsViewModel.buildList(response, invokeSource, wikiSite, SearchResult.SearchResultType.PREFIX))
+        resultList.addAll(SearchResultsViewModel.buildList(response, wikiSite, SearchResult.SearchResultType.PREFIX))
 
         if (resultList.size < batchSize) {
             val fullTextResponse = ServiceFactory.get(wikiSite)
@@ -57,7 +57,7 @@ class StandardSearchRepository : SearchRepository<StandardSearchResults> {
             lastXSearchIdFullText = fullTextResponse.headers()["x-search-id"]
             response = fullTextResponse.body()
             currentContinuation = response?.continuation?.gsroffset
-            resultList.addAll(SearchResultsViewModel.buildList(response, invokeSource, wikiSite, SearchResult.SearchResultType.FULL_TEXT))
+            resultList.addAll(SearchResultsViewModel.buildList(response, wikiSite, SearchResult.SearchResultType.FULL_TEXT))
         }
 
         if (resultList.isEmpty() && response?.continuation == null) {

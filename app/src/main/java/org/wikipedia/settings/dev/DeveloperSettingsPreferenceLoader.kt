@@ -192,11 +192,6 @@ internal class DeveloperSettingsPreferenceLoader(fragment: PreferenceFragmentCom
             }
             true
         }
-        findPreference(R.string.preference_developer_clear_last_location_and_zoom_level).onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            Prefs.placesLastLocationAndZoomLevel = null
-            Toast.makeText(activity, "Reset complete.", Toast.LENGTH_SHORT).show()
-            true
-        }
         findPreference(R.string.preference_key_memory_leak_test).onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _: Preference, _: Any? ->
             setupLeakCanary()
             true

@@ -21,7 +21,6 @@ import org.wikipedia.Constants
 import org.wikipedia.Constants.InvokeSource
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.analytics.eventplatform.PlacesEvent
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.databinding.FragmentSearchBinding
 import org.wikipedia.extensions.instrument
@@ -134,10 +133,6 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
         binding.searchContainer.setOnClickListener { onSearchContainerClick() }
         binding.searchLangButton.setOnClickListener { onLangButtonClick() }
         initSearchView()
-        if (invokeSource == InvokeSource.PLACES) {
-            Prefs.selectedLanguagePositionInSearch = app.languageState.appLanguageCodes.indexOf(Prefs.placesWikiCode)
-            PlacesEvent.logImpression("search_view")
-        }
 
         requireActivity().instrument?.submitInteraction("search_impression", actionSource = invokeSource.value)
 
@@ -155,7 +150,7 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
         setUpLanguageScroll(languagePosition)
         startSearch(query, langBtnClicked)
         binding.searchCabView.setCloseButtonVisibility(query)
-        recentSearchesFragment.binding.namespacesContainer.isVisible = invokeSource != InvokeSource.PLACES
+        recentSearchesFragment.binding.namespacesContainer.isVisible = true
         if (!query.isNullOrEmpty()) {
             showPanel(PANEL_SEARCH_RESULTS)
         }
@@ -289,7 +284,7 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
                     searchResultsFragment.startSearch(term, force, resetHybridSearch)
                 }
             }
-        }, if (invokeSource == InvokeSource.PLACES || invokeSource == InvokeSource.VOICE || invokeSource == InvokeSource.INTENT_SHARE || invokeSource == InvokeSource.INTENT_PROCESS_TEXT) INTENT_DELAY_MILLIS else 0)
+        }, if (invokeSource == InvokeSource.VOICE || invokeSource == InvokeSource.INTENT_SHARE || invokeSource == InvokeSource.INTENT_PROCESS_TEXT) INTENT_DELAY_MILLIS else 0)
     }
 
     private fun openSearch() {
@@ -339,9 +334,7 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
                 R.attr.secondary_color))
 
         binding.searchCabView.queryHint =
-            if (invokeSource == InvokeSource.PLACES) {
-                getString(R.string.places_search_hint)
-            } else if (Prefs.isHybridSearchOnboardingShown && HybridSearchAbCTest().isHybridSearchEnabled(WikipediaApp.instance.languageState.appLanguageCode)) {
+            if (Prefs.isHybridSearchOnboardingShown && HybridSearchAbCTest().isHybridSearchEnabled(WikipediaApp.instance.languageState.appLanguageCode)) {
                 if (articleTitle.isNullOrEmpty()) {
                     getString(R.string.hybrid_search_search_hint)
                 } else {
