@@ -129,6 +129,12 @@ object Prefs {
         get() = PrefsIoUtil.getInt(R.string.preference_key_editing_text_size_multiplier, 0)
         set(multiplier) = PrefsIoUtil.setInt(R.string.preference_key_editing_text_size_multiplier, multiplier)
 
+    val announcementDebugUrl
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_announcement_debug_url, false)
+
+    val announcementCustomTabTestUrl
+        get() = PrefsIoUtil.getString(R.string.preference_key_announcement_custom_tab_test_url, null)
+
     var announcementPauseTime
         get() = PrefsIoUtil.getLong(R.string.preference_key_announcement_pause_time, 0)
         set(time) = PrefsIoUtil.setLong(R.string.preference_key_announcement_pause_time, time)
