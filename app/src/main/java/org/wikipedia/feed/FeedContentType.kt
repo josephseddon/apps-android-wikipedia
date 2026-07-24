@@ -10,6 +10,7 @@ import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.mainpage.MainPageClient
 import org.wikipedia.feed.random.RandomClient
+import org.wikipedia.feed.wotd.ForeignWordOfTheDayClient
 import org.wikipedia.feed.wotd.WordOfTheDayClient
 import org.wikipedia.model.EnumCode
 import org.wikipedia.settings.Prefs
@@ -68,6 +69,11 @@ enum class FeedContentType(private val code: Int,
     WORD_OF_THE_DAY(11, R.string.view_word_of_the_day_card_title, R.string.feed_item_type_word_of_the_day, true) {
         override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
             return if (isEnabled) WordOfTheDayClient(coroutineScope) else null
+        }
+    },
+    FOREIGN_WORD_OF_THE_DAY(12, R.string.view_foreign_word_of_the_day_card_title, R.string.feed_item_type_foreign_word_of_the_day, true) {
+        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+            return if (isEnabled) ForeignWordOfTheDayClient(coroutineScope) else null
         }
     };
 

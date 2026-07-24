@@ -862,6 +862,7 @@
     <string name="view_offline_card_text">Content cannot be loaded when offline.</string>
     <string name="view_featured_article_card_title">Featured article</string>
     <string name="view_word_of_the_day_card_title">Word of the day</string>
+    <string name="view_foreign_word_of_the_day_card_title">Foreign word of the day</string>
     <string name="view_word_of_the_day_card_footer">See full entry</string>
     <string name="view_static_card_save_button_label">Save</string>
     <string name="feed_configure_activity_title">Customize the feed</string>
@@ -874,6 +875,7 @@
     <string name="feed_item_type_because_you_read">Suggestions based on a recently read article from your history</string>
     <string name="feed_item_type_featured_article">Daily featured article on Wikipedia</string>
     <string name="feed_item_type_word_of_the_day">Wiktionary\'s word of the day</string>
+    <string name="feed_item_type_foreign_word_of_the_day">Wiktionary\'s foreign word of the day</string>
     <string name="feed_item_type_trending">Daily most-viewed articles</string>
     <string name="feed_item_type_featured_image">Daily featured image from Wikimedia Commons</string>
     <string name="feed_item_type_main_page">Main page of Wikipedia with daily featured content</string>
