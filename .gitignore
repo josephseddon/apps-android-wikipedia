@@ -44,3 +44,6 @@ device*.png
 
 # Log Files
 *.log
+
+# Claude Code local session/agent artifacts
+.claude/
