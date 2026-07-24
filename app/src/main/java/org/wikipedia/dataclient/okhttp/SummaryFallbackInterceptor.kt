@@ -91,15 +91,16 @@ class SummaryFallbackInterceptor : Interceptor {
         val langCode = host.substringBefore('.')
 
         val page = fetchPageInfo(scheme, host, title)
-        val definitionText = fetchFirstDefinition(scheme, host, title)
+        val definition = fetchFirstDefinition(scheme, host, title)
 
         val summary = PageSummary(
             namespace = page?.let { PageSummary.NamespaceContainer(it.ns, "") },
             titles = PageSummary.Titles(page?.title ?: title, page?.title ?: title),
             lang = langCode,
             thumbnail = page?.thumbUrl()?.let { PageSummary.Thumbnail(it, 0, 0) },
-            extract = definitionText,
-            description = definitionText,
+            extract = definition?.plainText,
+            extractHtml = definition?.html,
+            description = definition?.plainText,
             pageId = page?.pageId ?: 0,
             revision = page?.lastrevid ?: 0L
         )
@@ -118,14 +119,21 @@ class SummaryFallbackInterceptor : Interceptor {
         }
     }
 
+    private class FirstDefinition(val html: String, val plainText: String)
+
     /**
      * Picks the section to show a definition from the same way Wiktionary's own
      * [MediaWiki:Gadget-PagePreviews.js](https://en.wiktionary.org/wiki/MediaWiki:Gadget-PagePreviews.js)
      * does when a preview isn't anchored to a specific language section: prefer English, then
      * Chinese, then Translingual, then whichever section comes first on the page (the response
      * map preserves page order, so the first entry is the first section).
+     *
+     * Returns both an HTML and a plain-text rendering: [PageSummary.extractHtml] (what the link
+     * preview dialog and description-edit screens actually render, via `StringUtil.fromHtml()`)
+     * needs real markup, while [PageSummary.extract]/[PageSummary.description] (feed cards, search
+     * results, etc.) expect plain text.
      */
-    private fun fetchFirstDefinition(scheme: String, host: String, title: String): String? {
+    private fun fetchFirstDefinition(scheme: String, host: String, title: String): FirstDefinition? {
         return try {
             val defUrl = "$scheme://$host/api/rest_v1/page/definition/${UriUtil.encodeURL(title)}"
             val defJson = executeSync(defUrl) ?: return null
@@ -136,10 +144,13 @@ class SummaryFallbackInterceptor : Interceptor {
                 .mapNotNull { preferred -> usageGroups.firstOrNull { group -> group.any { it.language == preferred } } }
                 .firstOrNull() ?: usageGroups.firstOrNull()
 
-            preferredGroup?.asSequence()
+            val html = preferredGroup?.asSequence()
                 ?.flatMap { it.definitions.asSequence() }
-                ?.map { it.definition.replace(HTML_TAG_REGEX, "").trim() }
+                ?.map { it.definition.trim() }
                 ?.firstOrNull { it.isNotEmpty() }
+                ?: return null
+
+            FirstDefinition(html, html.replace(HTML_TAG_REGEX, "").trim())
         } catch (e: Exception) {
             L.e(e)
             null
