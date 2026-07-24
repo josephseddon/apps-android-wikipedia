@@ -36,9 +36,6 @@ class ReadingListFragmentViewModel : ViewModel() {
     private val _recommendedListFlow = MutableStateFlow(Resource<ReadingList>())
     val recommendedListFlow = _recommendedListFlow.asStateFlow()
 
-    private val _yirListFlow = MutableStateFlow(Resource<ReadingList>())
-    val yirListFlow = _yirListFlow.asStateFlow()
-
     fun updateListById(readingListId: Long) {
          viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
              viewModelScope.launch {

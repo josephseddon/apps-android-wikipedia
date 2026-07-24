@@ -4,16 +4,12 @@ import androidx.annotation.StringRes
 import kotlinx.coroutines.CoroutineScope
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.feed.accessibility.AccessibilityCardClient
 import org.wikipedia.feed.aggregated.AggregatedFeedContentClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.mainpage.MainPageClient
-import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.random.RandomClient
-import org.wikipedia.feed.suggestededits.SuggestedEditsFeedClient
-import org.wikipedia.feed.wikigames.WikiGamesCardClient
 import org.wikipedia.model.EnumCode
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
@@ -28,19 +24,9 @@ enum class FeedContentType(private val code: Int,
             return if (isEnabled) AggregatedFeedContentClient.FeaturedArticle(coroutineScope, aggregatedClient) else null
         }
     },
-    WIKI_GAMES(12, R.string.wikipedia_games_title, R.string.wikipedia_games_subtitle, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled && age == 0 && WikipediaApp.instance.isOnline) WikiGamesCardClient(coroutineScope) else null
-        }
-    },
     TOP_READ_ARTICLES(3, R.string.view_top_read_card_title, R.string.feed_item_type_trending, true) {
         override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
             return if (isEnabled) AggregatedFeedContentClient.TopReadArticles(coroutineScope, aggregatedClient) else null
-        }
-    },
-    PLACES(11, R.string.places_title, R.string.feed_item_type_places, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) PlacesFeedClient(coroutineScope) else null
         }
     },
     FEATURED_IMAGE(7, R.string.view_featured_image_card_title, R.string.feed_item_type_featured_image, false) {
@@ -71,11 +57,6 @@ enum class FeedContentType(private val code: Int,
     MAIN_PAGE(4, R.string.view_main_page_card_title, R.string.feed_item_type_main_page, true) {
         override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
             return if (isEnabled && age == 0) MainPageClient() else null
-        }
-    },
-    SUGGESTED_EDITS(9, R.string.suggested_edits_feed_card_title, R.string.feed_item_type_suggested_edits, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled && AccountUtil.isLoggedIn && WikipediaApp.instance.isOnline) SuggestedEditsFeedClient(coroutineScope) else null
         }
     },
     ACCESSIBILITY(10, 0, 0, false, false) {

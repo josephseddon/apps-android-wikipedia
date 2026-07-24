@@ -22,7 +22,6 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import org.wikipedia.R
 import org.wikipedia.WikipediaApp
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.databinding.FragmentFeedConfigureBinding
 import org.wikipedia.feed.FeedContentType
 import org.wikipedia.settings.Prefs
@@ -114,10 +113,6 @@ class ConfigureFragment : Fragment(), MenuProvider, ConfigureItemView.Callback {
         while (i.hasNext()) {
             val feedContentType = i.next()
             if (!feedContentType.showInConfig) {
-                i.remove()
-                continue
-            }
-            if (!AccountUtil.isLoggedIn && feedContentType === FeedContentType.SUGGESTED_EDITS) {
                 i.remove()
                 continue
             }

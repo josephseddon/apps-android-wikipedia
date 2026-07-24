@@ -110,26 +110,6 @@
                 <!-- Add more deeplink hosts as needed -->
             </intent-filter>
         </activity-alias>
-        <activity-alias
-            android:name=".YIR25Icon"
-            android:targetActivity=".main.MainActivity"
-            android:icon="@mipmap/launcher_yir25"
-            android:exported="true"
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-                <category android:name="android.intent.category.MULTIWINDOW_LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="wikipedia" />
-                <data android:host="*.wikipedia.org" />
-                <!-- Add more deeplink hosts as needed -->
-            </intent-filter>
-        </activity-alias>
 
         <activity
             android:name=".page.PageActivity"
@@ -174,14 +154,6 @@
             android:name=".language.addlanguages.AddLanguagesListActivity"
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"/>
-        <activity
-            android:name=".suggestededits.SuggestionsActivity"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".suggestededits.SuggestedEditsTasksActivity"
-            android:theme="@style/AppTheme.ActionBar"
-            android:label="@string/suggested_edits_activity_title" />
         <activity
             android:name=".edit.EditSectionActivity"
             android:windowSoftInputMode="adjustResize|stateVisible"
@@ -282,10 +254,6 @@
 
         <activity android:name=".suggestededits.SuggestedEditsImageTagsOnboardingActivity" />
 
-        <activity android:name=".suggestededits.SuggestedEditsImageRecsOnboardingActivity" />
-
-        <activity android:name=".suggestededits.SuggestedEditsRecentEditsOnboardingActivity" />
-
         <activity
             android:name=".watchlist.WatchlistActivity"
             android:label="@string/watchlist_title"
@@ -299,14 +267,6 @@
         <activity
             android:name=".suggestededits.SuggestedEditsImageTagEditActivity"
             android:theme="@style/AppTheme.ActionBar" />
-
-        <activity
-            android:name=".suggestededits.SuggestedEditsRecentEditsActivity"/>
-
-        <activity
-            android:name=".suggestededits.SuggestedEditsRecentEditsFilterActivity"
-            android:label="@string/patroller_tasks_filters_title"
-            android:theme="@style/AppTheme.ActionBar"/>
 
         <activity
             android:name=".commons.FilePageActivity"
@@ -368,12 +328,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity
-            android:name=".places.PlacesActivity" />
-
-        <activity
-            android:name=".places.PlacesFilterActivity"/>
-
-        <activity
             android:name=".talk.template.TalkTemplatesActivity"
             android:theme="@style/AppTheme" />
 
@@ -384,23 +338,11 @@
             android:name=".settings.AboutActivity"/>
 
         <activity
-            android:name=".games.onthisday.OnThisDayGameActivity"/>
-
-        <activity
-            android:name=".games.GamesHubActivity"/>
-
-        <activity
             android:name=".readinglist.recommended.RecommendedReadingListOnboardingActivity"/>
 
         <activity
             android:name=".settings.dev.playground.CategoryDeveloperPlayGround"/>
 
-        <activity
-            android:name=".yearinreview.YearInReviewOnboardingActivity"/>
-
-        <activity
-            android:name=".yearinreview.YearInReviewActivity"/>
-      
         <activity
             android:name=".readinglist.recommended.RecommendedReadingListSettingsActivity"
             android:windowSoftInputMode="adjustResize" />

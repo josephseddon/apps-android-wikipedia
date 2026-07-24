@@ -41,7 +41,6 @@ import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.activitytab.ActivityTabFragment
 import org.wikipedia.activitytab.ActivityTabOnboardingActivity
 import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
-import org.wikipedia.analytics.eventplatform.WikiGamesEvent
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.commons.FilePageActivity
 import org.wikipedia.concurrency.FlowEventBus
@@ -59,7 +58,6 @@ import org.wikipedia.feed.news.NewsCard
 import org.wikipedia.feed.news.NewsItemView
 import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.gallery.MediaDownloadReceiver
-import org.wikipedia.games.GamesHubActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.history.HistoryFragment
 import org.wikipedia.login.LoginActivity
@@ -71,7 +69,6 @@ import org.wikipedia.page.ExclusiveBottomSheetPresenter
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.tabs.TabActivity
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.random.RandomActivity
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.readinglist.ReadingListsFragment
@@ -82,8 +79,6 @@ import org.wikipedia.settings.SettingsActivity
 import org.wikipedia.staticdata.MainPageNameData
 import org.wikipedia.staticdata.UserAliasData
 import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.suggestededits.SuggestedEditsTasksActivity
-import org.wikipedia.suggestededits.SuggestedEditsTasksFragment
 import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.usercontrib.UserContribListActivity
 import org.wikipedia.util.DimenUtil
@@ -94,9 +89,6 @@ import org.wikipedia.views.NotificationButtonView
 import org.wikipedia.views.TabCountsView
 import org.wikipedia.views.imageservice.ImageService
 import org.wikipedia.watchlist.WatchlistActivity
-import org.wikipedia.yearinreview.YearInReviewDialog
-import org.wikipedia.yearinreview.YearInReviewOnboardingActivity
-import org.wikipedia.yearinreview.YearInReviewViewModel
 import java.io.File
 import java.util.concurrent.TimeUnit
 
@@ -218,11 +210,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         downloadReceiver.register(requireContext(), downloadReceiverCallback)
         // reset the last-page-viewed timer
         Prefs.pageLastShown = 0
-        YearInReviewDialog.maybeShowYearInReviewFeedbackDialog(requireActivity())
-        if (YearInReviewViewModel.getYearInReviewModel()?.isReadingListCreated == true) {
-            onNavigateTo(NavTab.READING_LISTS) // Navigate to reading lists only if Year in Review reading list is created
-            YearInReviewViewModel.updateYearInReviewModel { it.copy(isReadingListCreated = false) }
-        }
     }
 
     override fun onDestroyView() {
@@ -304,7 +291,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         menu.findItem(R.id.menu_overflow_button).isVisible = currentFragment is ReadingListsFragment
 
         val tabsItem = menu.findItem(R.id.menu_tabs)
-        if (WikipediaApp.instance.tabCount < 1 || currentFragment is SuggestedEditsTasksFragment) {
+        if (WikipediaApp.instance.tabCount < 1) {
             tabsItem.isVisible = false
             tabCountsView = null
         } else {
@@ -350,8 +337,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
             openSearchActivity(InvokeSource.APP_SHORTCUTS, null, null)
         } else if (intent.hasExtra(Constants.INTENT_APP_SHORTCUT_CONTINUE_READING)) {
             startActivity(PageActivity.newIntent(requireActivity()))
-        } else if (intent.hasExtra(Constants.INTENT_APP_SHORTCUT_PLACES)) {
-            startActivity(PlacesActivity.newIntent(requireActivity()))
         } else if (intent.hasExtra(Constants.INTENT_EXTRA_DELETE_READING_LIST)) {
             onNavigateTo(NavTab.READING_LISTS)
         } else if (intent.hasExtra(Constants.INTENT_EXTRA_GO_TO_MAIN_TAB) &&
@@ -415,10 +400,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         }
     }
 
-    override fun onFeedSeCardFooterClicked() {
-        startActivity(SuggestedEditsTasksActivity.newIntent(requireActivity()))
-    }
-
     override fun onFeedShareImage(card: FeaturedImageCard) {
         val thumbUrl = card.baseImage().thumbnailUrl
         val fullSizeUrl = card.baseImage().original.source
@@ -452,11 +433,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
 
     override fun updateToolbarElevation(elevate: Boolean) {
         callback()?.updateToolbarElevation(elevate)
-    }
-
-    override fun onWikiGamesCardFooterClicked() {
-        WikiGamesEvent.submit(action = "more_click", "game_feed")
-        startActivity(GamesHubActivity.newIntent(requireActivity()))
     }
 
     fun requestUpdateToolbarElevation() {
@@ -514,10 +490,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
 
     override fun donateClick(campaignId: String?) {
         (requireActivity() as? BaseActivity)?.launchDonateDialog(campaignId = campaignId)
-    }
-
-    override fun yearInReviewClick() {
-        startActivity(YearInReviewOnboardingActivity.newIntent(requireActivity()))
     }
 
     fun setBottomNavVisible(visible: Boolean) {
@@ -580,7 +552,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
             is FeedFragment -> fragment.refresh()
             is ReadingListsFragment -> fragment.updateLists()
             is HistoryFragment -> fragment.refresh()
-            is SuggestedEditsTasksFragment -> fragment.refreshContents()
         }
     }
 

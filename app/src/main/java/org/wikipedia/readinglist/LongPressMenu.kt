@@ -20,9 +20,7 @@ import org.wikipedia.readinglist.database.ReadingList
 import org.wikipedia.readinglist.database.ReadingListPage
 import org.wikipedia.util.ClipboardUtil
 import org.wikipedia.util.FeedbackUtil
-import org.wikipedia.util.GeoUtil
 import org.wikipedia.util.ShareUtil
-import org.wikipedia.util.StringUtil
 
 class LongPressMenu(
     private val anchorView: View,
@@ -91,7 +89,6 @@ class LongPressMenu(
                 val showOpenPageInPlaces = openPageInPlaces && location != null
                 menu.menu.findItem(R.id.menu_long_press_open_in_places)?.isVisible = showOpenPageInPlaces
                 menu.menu.findItem(R.id.menu_long_press_open_page)?.isVisible = !showOpenPageInPlaces
-                menu.menu.findItem(R.id.menu_long_press_get_directions)?.isVisible = location != null
                 menu.show()
             }
         }
@@ -178,15 +175,6 @@ class LongPressMenu(
                     entry?.let {
                         ClipboardUtil.setPlainText(getActivity(), text = it.title.uri)
                         FeedbackUtil.showMessage((getActivity()), R.string.address_copied)
-                    }
-                    true
-                }
-                R.id.menu_long_press_get_directions -> {
-                    sendPlacesEvent("directions_click")
-                    location?.let {
-                        entry?.let {
-                            GeoUtil.sendGeoIntent(getActivity(), location, StringUtil.fromHtml(it.title.displayText).toString())
-                        }
                     }
                     true
                 }

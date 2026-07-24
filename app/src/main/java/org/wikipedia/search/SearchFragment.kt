@@ -29,7 +29,6 @@ import org.wikipedia.history.HistoryEntry
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
-import org.wikipedia.places.PlacesActivity
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.search.db.RecentSearch
 import org.wikipedia.settings.Prefs
@@ -231,12 +230,8 @@ class SearchFragment : Fragment(), SearchResultCallback, RecentSearchesFragment.
             return
         }
 
-        if (returnLink && (if (invokeSource == InvokeSource.PLACES) location != null else true)) {
-            if (invokeSource == InvokeSource.PLACES) {
-                PlacesEvent.logAction("search_result_click", "search_view")
-            }
+        if (returnLink) {
             val intent = Intent().putExtra(SearchActivity.EXTRA_RETURN_LINK_TITLE, item)
-                .putExtra(PlacesActivity.EXTRA_LOCATION, location)
             requireActivity().setResult(SearchActivity.RESULT_LINK_SUCCESS, intent)
             requireActivity().finish()
         } else {

@@ -2,22 +2,18 @@ package org.wikipedia.suggestededits.provider
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.wikipedia.Constants
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.dataclient.mwapi.MwException
 import org.wikipedia.dataclient.mwapi.MwQueryPage
-import org.wikipedia.dataclient.mwapi.MwQueryResult
 import org.wikipedia.dataclient.page.PageSummary
 import org.wikipedia.dataclient.wikidata.Entities
 import org.wikipedia.descriptions.DescriptionEditUtil
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageTitle
-import org.wikipedia.suggestededits.SuggestedEditsRecentEditsViewModel
 import org.wikipedia.util.log.L
-import java.time.Instant
 import java.util.concurrent.Semaphore
 import kotlin.math.abs
 
@@ -41,11 +37,6 @@ object EditingSuggestionsProvider {
     private val articlesWithImageRecommendationsCache = ArrayDeque<MwQueryPage>()
     private var articlesWithImageRecommendationsCacheLang: String = ""
     private var articlesWithImageRecommendationsLastMillis: Long = 0
-
-    private var revertCandidateLang: String = ""
-    private val revertCandidateCache: ArrayDeque<MwQueryResult.RecentChange> = ArrayDeque()
-    private var revertCandidateLastRevId = 0L
-    private var revertCandidateLastTimeStamp = Instant.now()
 
     private const val MAX_RETRY_LIMIT: Long = 20
 
@@ -350,90 +341,4 @@ object EditingSuggestionsProvider {
         return page
     }
 
-    fun populateRevertCandidateCache(lang: String, recentChanges: List<MwQueryResult.RecentChange>) {
-        revertCandidateLang = lang
-        revertCandidateCache.clear()
-        revertCandidateLastRevId = 0L
-        recentChanges.forEach {
-            revertCandidateCache.addFirst(it)
-            if (it.curRev > revertCandidateLastRevId) {
-                revertCandidateLastRevId = it.curRev
-                revertCandidateLastTimeStamp = it.parsedInstant
-            }
-        }
-    }
-
-    @Suppress("KotlinConstantConditions")
-    suspend fun getNextRevertCandidate(lang: String): MwQueryResult.RecentChange {
-        return withContext(Dispatchers.IO) {
-            try {
-                mutex.acquire()
-                var cachedItem: MwQueryResult.RecentChange? = null
-                if (revertCandidateLang != lang) {
-                    // evict the cache if the language has changed.
-                    revertCandidateCache.clear()
-                    revertCandidateLastRevId = 0L
-                }
-                revertCandidateLang = lang
-                if (!revertCandidateCache.isEmpty()) {
-                    cachedItem = revertCandidateCache.removeFirst()
-                }
-
-                if (cachedItem == null) {
-                    val wikiSite = WikiSite.forLanguageCode(lang)
-                    while (this.coroutineContext.isActive) {
-                        try {
-                            // If we have been reset, then fetch a few *older* changes, so that the user
-                            // has a few changes to flip through. Otherwise, start fetching *newer* changes,
-                            // starting from the last recorded timestamp.
-                            val triple = if (revertCandidateLastRevId == 0L)
-                                SuggestedEditsRecentEditsViewModel.getRecentEditsCall(wikiSite)
-                            else
-                                SuggestedEditsRecentEditsViewModel.getRecentEditsCall(wikiSite,
-                                    startTimeStamp = revertCandidateLastTimeStamp, direction = "newer")
-
-                            // Retrieve the list of filtered changes from our filter, but *also* get
-                            // the list of total changes so that we can update our maxRevId and latest
-                            // timestamp, to ensure that our next call will start at the correct point.
-                            val filteredChanges = triple.first.sortedBy { it.curRev }
-                            val allChanges = triple.second
-
-                            var maxRevId = 0L
-                            for (candidate in allChanges) {
-                                if (candidate.curRev > maxRevId) {
-                                    maxRevId = candidate.curRev
-                                }
-                                if (candidate.parsedInstant > revertCandidateLastTimeStamp) {
-                                    revertCandidateLastTimeStamp = candidate.parsedInstant
-                                }
-                            }
-                            for (candidate in filteredChanges) {
-                                if (candidate.curRev > revertCandidateLastRevId) {
-                                    revertCandidateCache.addLast(candidate)
-                                }
-                            }
-                            if (maxRevId > revertCandidateLastRevId) {
-                                revertCandidateLastRevId = maxRevId
-                            }
-                            if (!revertCandidateCache.isEmpty()) {
-                                cachedItem = revertCandidateCache.removeFirst()
-                            }
-                            if (cachedItem == null) {
-                                throw ListEmptyException()
-                            }
-                            break
-                        } catch (e: ListEmptyException) {
-                            // continue indefinitely until new data comes in.
-                            Thread.sleep(3000)
-                        }
-                    }
-                }
-                cachedItem!!
-            } finally {
-                mutex.release()
-            }
-        }
-    }
-
-    class ListEmptyException : RuntimeException()
 }

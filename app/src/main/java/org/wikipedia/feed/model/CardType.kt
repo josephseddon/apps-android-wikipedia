@@ -13,14 +13,11 @@ import org.wikipedia.feed.mainpage.MainPageCardView
 import org.wikipedia.feed.news.NewsCardView
 import org.wikipedia.feed.offline.OfflineCardView
 import org.wikipedia.feed.onthisday.OnThisDayCardView
-import org.wikipedia.feed.places.PlacesCardView
 import org.wikipedia.feed.progress.ProgressCardView
 import org.wikipedia.feed.random.RandomCardView
 import org.wikipedia.feed.searchbar.SearchCardView
-import org.wikipedia.feed.suggestededits.SuggestedEditsCardView
 import org.wikipedia.feed.topread.TopReadCardView
 import org.wikipedia.feed.view.FeedCardView
-import org.wikipedia.feed.wikigames.WikiGamesCardView
 import org.wikipedia.model.EnumCode
 
 enum class CardType(
@@ -97,24 +94,9 @@ enum class CardType(
             return AnnouncementCardView(ctx)
         }
     },
-    SUGGESTED_EDITS(21, FeedContentType.SUGGESTED_EDITS) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return SuggestedEditsCardView(ctx)
-        }
-    },
     ACCESSIBILITY(22, FeedContentType.ACCESSIBILITY) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AccessibilityCardView(ctx)
-        }
-    },
-    PLACES(23, FeedContentType.PLACES) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return PlacesCardView(ctx)
-        }
-    },
-    WIKI_GAMES(24, FeedContentType.WIKI_GAMES) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return WikiGamesCardView(ctx)
         }
     },
     DAY_HEADER(97) {
