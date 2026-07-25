@@ -6,7 +6,6 @@ import org.wikipedia.feed.accessibility.AccessibilityCard
 import org.wikipedia.feed.announcement.AnnouncementClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
-import org.wikipedia.feed.dayheader.DayHeaderCard
 import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCard
 import org.wikipedia.feed.discover.DiscoverCard
 import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicCard
@@ -39,8 +38,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     private val progressCard = ProgressCard()
     private var wiki: WikiSite? = null
     private var updateListener: FeedUpdateListener? = null
-    private var currentDayCardAge = -1
     private var currentMonthCardKey = -1
+    private val monthlyCardTypesShownThisMonth = mutableSetOf<CardType>()
     private val hiddenCards =
         Collections.newSetFromMap(object : LinkedHashMap<String, Boolean>() {
             public override fun removeEldestEntry(eldest: Map.Entry<String, Boolean>): Boolean {
@@ -66,8 +65,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     open fun reset() {
         wiki = null
         age = 0
-        currentDayCardAge = -1
         currentMonthCardKey = -1
+        monthlyCardTypesShownThisMonth.clear()
         for (client in pendingClients) {
             client.cancel()
         }
@@ -224,14 +223,16 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     private fun appendCard(card: Card) {
         val progressPos = cards.indexOf(progressCard)
         var pos = if (progressPos >= 0) progressPos else cards.size
-        if (isDailyCardType(card) && currentDayCardAge < age) {
-            currentDayCardAge = age
-            insertCard(DayHeaderCard(currentDayCardAge), pos++)
-        } else if (isMonthlyCardType(card)) {
+        if (isMonthlyCardType(card)) {
             val monthKey = DateUtil.getDefaultDateFor(age).let { it.get(Calendar.YEAR) * 12 + it.get(Calendar.MONTH) }
             if (monthKey != currentMonthCardKey) {
                 currentMonthCardKey = monthKey
+                monthlyCardTypesShownThisMonth.clear()
                 insertCard(MonthHeaderCard(age), pos++)
+            }
+            // Only one card of a given monthly type (e.g. one Random pick) per calendar month.
+            if (!monthlyCardTypesShownThisMonth.add(card.type())) {
+                return
             }
         }
         insertCard(card, pos)
@@ -267,13 +268,9 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         Prefs.hiddenCards = hiddenCards
     }
 
-    private fun isDailyCardType(card: Card): Boolean {
-        return card is RandomCard
-    }
-
     private fun isMonthlyCardType(card: Card): Boolean {
         return card is DestinationOfTheMonthCard || card is OffTheBeatenPathCard ||
-                card is FeaturedTravelTopicCard || card is DiscoverCard
+                card is FeaturedTravelTopicCard || card is DiscoverCard || card is RandomCard
     }
 
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {
