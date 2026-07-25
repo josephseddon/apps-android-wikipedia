@@ -8,12 +8,9 @@ import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.dayheader.DayHeaderCard
 import org.wikipedia.feed.featured.FeaturedArticleCard
-import org.wikipedia.feed.image.FeaturedImageCard
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.CardType
-import org.wikipedia.feed.news.NewsCard
 import org.wikipedia.feed.offline.OfflineCard
-import org.wikipedia.feed.onthisday.OnThisDayCard
 import org.wikipedia.feed.progress.ProgressCard
 import org.wikipedia.feed.topread.TopReadListCard
 import org.wikipedia.settings.Prefs
@@ -96,10 +93,6 @@ abstract class FeedCoordinatorBase(private val context: Context) {
                 FeedContentType.RANDOM.isEnabled = false
                 FeedContentType.saveState()
             }
-            card.type() === CardType.MAIN_PAGE -> {
-                FeedContentType.MAIN_PAGE.isEnabled = false
-                FeedContentType.saveState()
-            }
             else -> {
                 addHiddenCard(card)
             }
@@ -113,10 +106,6 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         when {
             card.type() === CardType.RANDOM -> {
                 FeedContentType.RANDOM.isEnabled = true
-                FeedContentType.saveState()
-            }
-            card.type() === CardType.MAIN_PAGE -> {
-                FeedContentType.MAIN_PAGE.isEnabled = true
                 FeedContentType.saveState()
             }
             else -> unHideCard(card)
@@ -256,9 +245,7 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     }
 
     private fun isDailyCardType(card: Card): Boolean {
-        return card is NewsCard || card is OnThisDayCard ||
-                card is TopReadListCard || card is FeaturedArticleCard ||
-                card is FeaturedImageCard
+        return card is TopReadListCard || card is FeaturedArticleCard
     }
 
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {

@@ -12,7 +12,6 @@ import org.wikipedia.dataclient.restbase.UserEdits
 import org.wikipedia.feed.aggregated.AggregatedFeedContent
 import org.wikipedia.feed.announcement.AnnouncementList
 import org.wikipedia.feed.configure.FeedAvailability
-import org.wikipedia.feed.onthisday.OnThisDay
 import org.wikipedia.gallery.MediaList
 import org.wikipedia.readinglist.sync.SyncedReadingLists
 import org.wikipedia.readinglist.sync.SyncedReadingLists.RemoteIdResponse
@@ -79,10 +78,6 @@ interface RestService {
         @Path("title") title: String,
         @Path("revision") revision: Long
     ): MediaList
-
-    @GET("feed/onthisday/events/{mm}/{dd}")
-    suspend fun getOnThisDay(@Path("mm") month: Int,
-                             @Path("dd") day: Int): OnThisDay
 
     // TODO: Remove this before next fundraising campaign in 2024
     @GET("feed/announcements")

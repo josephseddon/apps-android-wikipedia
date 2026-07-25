@@ -7,12 +7,7 @@ import org.wikipedia.feed.accessibility.AccessibilityCardView
 import org.wikipedia.feed.announcement.AnnouncementCardView
 import org.wikipedia.feed.becauseyouread.BecauseYouReadCardView
 import org.wikipedia.feed.dayheader.DayHeaderCardView
-import org.wikipedia.feed.featured.FeaturedArticleCardView
-import org.wikipedia.feed.image.FeaturedImageCardView
-import org.wikipedia.feed.mainpage.MainPageCardView
-import org.wikipedia.feed.news.NewsCardView
 import org.wikipedia.feed.offline.OfflineCardView
-import org.wikipedia.feed.onthisday.OnThisDayCardView
 import org.wikipedia.feed.progress.ProgressCardView
 import org.wikipedia.feed.random.RandomCardView
 import org.wikipedia.feed.searchbar.SearchCardView
@@ -41,32 +36,12 @@ enum class CardType(
             return TopReadCardView(ctx)
         }
     },
-    FEATURED_ARTICLE(4, FeedContentType.FEATURED_ARTICLE) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return FeaturedArticleCardView(ctx)
-        }
-    },
     RANDOM(5, FeedContentType.RANDOM) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return RandomCardView(ctx)
         }
     },
-    MAIN_PAGE(6, FeedContentType.MAIN_PAGE) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return MainPageCardView(ctx)
-        }
-    },
-    NEWS_LIST(7, FeedContentType.NEWS) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return NewsCardView(ctx)
-        }
-    },
-    FEATURED_IMAGE(8, FeedContentType.FEATURED_IMAGE) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return FeaturedImageCardView(ctx)
-        }
-    },
-    BECAUSE_YOU_READ_ITEM(9), MOST_READ_ITEM(10), NEWS_ITEM(11), NEWS_ITEM_LINK(12), ANNOUNCEMENT(13) {
+    BECAUSE_YOU_READ_ITEM(9), MOST_READ_ITEM(10), ANNOUNCEMENT(13) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AnnouncementCardView(ctx)
         }
@@ -84,11 +59,6 @@ enum class CardType(
     ONBOARDING_OFFLINE(17) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AnnouncementCardView(ctx)
-        }
-    },
-    ON_THIS_DAY(18, FeedContentType.ON_THIS_DAY) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return OnThisDayCardView(ctx)
         }
     },
     ONBOARDING_CUSTOMIZE_FEED(19) {

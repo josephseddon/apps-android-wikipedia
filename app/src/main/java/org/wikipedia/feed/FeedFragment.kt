@@ -20,12 +20,8 @@ import org.wikipedia.feed.FeedCoordinatorBase.FeedUpdateListener
 import org.wikipedia.feed.configure.ConfigureActivity
 import org.wikipedia.feed.configure.ConfigureItemLanguageDialogView
 import org.wikipedia.feed.configure.LanguageItemAdapter
-import org.wikipedia.feed.image.FeaturedImage
-import org.wikipedia.feed.image.FeaturedImageCard
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.WikiSiteCard
-import org.wikipedia.feed.news.NewsCard
-import org.wikipedia.feed.news.NewsItemView
 import org.wikipedia.feed.random.RandomCardView
 import org.wikipedia.feed.topread.TopReadArticlesActivity
 import org.wikipedia.feed.topread.TopReadListCard
@@ -60,10 +56,6 @@ class FeedFragment : Fragment() {
         fun onFeedSelectPageWithAnimation(entry: HistoryEntry, sharedElements: Array<Pair<View, String>>)
         fun onFeedAddPageToList(entry: HistoryEntry, addToDefault: Boolean)
         fun onFeedMovePageToList(sourceReadingListId: Long, entry: HistoryEntry)
-        fun onFeedNewsItemSelected(card: NewsCard, view: NewsItemView)
-        fun onFeedShareImage(card: FeaturedImageCard)
-        fun onFeedDownloadImage(image: FeaturedImage)
-        fun onFeaturedImageSelected(card: FeaturedImageCard)
         fun onLoginRequested()
         fun updateToolbarElevation(elevate: Boolean)
     }
@@ -241,22 +233,6 @@ class FeedFragment : Fragment() {
 
         override fun onRequestCustomize(card: Card) {
             showConfigureActivity(card.type().code())
-        }
-
-        override fun onNewsItemSelected(card: NewsCard, view: NewsItemView) {
-            callback?.onFeedNewsItemSelected(card, view)
-        }
-
-        override fun onShareImage(card: FeaturedImageCard) {
-            callback?.onFeedShareImage(card)
-        }
-
-        override fun onDownloadImage(image: FeaturedImage) {
-            callback?.onFeedDownloadImage(image)
-        }
-
-        override fun onFeaturedImageSelected(card: FeaturedImageCard) {
-            callback?.onFeaturedImageSelected(card)
         }
 
         override fun onAnnouncementPositiveAction(card: Card, uri: Uri) {

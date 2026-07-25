@@ -8,7 +8,6 @@ import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.page.PageTitle
 import org.wikipedia.staticdata.MainPageNameData
-import org.wikipedia.util.DateUtil
 import org.wikipedia.util.StringUtil
 import org.wikipedia.util.UriUtil
 import org.wikipedia.util.log.L
@@ -22,23 +21,12 @@ class WidgetFeaturedPageWorker(
         return try {
             val app = WikipediaApp.instance
             val mainPageTitle = PageTitle(MainPageNameData.valueFor(app.appOrSystemLanguageCode), app.wikiSite)
-            val date = DateUtil.getUtcRequestDateFor(0)
 
-            val result = ServiceFactory.getRest(app.wikiSite)
-                .getFeedFeatured(date.year, date.month, date.day, app.wikiSite.languageCode)
-
-            // TODO: don't use PageSummary.
-            val summary = if (result.tfa != null) {
-                val hasParentLanguageCode = !app.languageState.getDefaultLanguageCode(app.wikiSite.languageCode).isNullOrEmpty()
-                if (hasParentLanguageCode) {
-                    ServiceFactory.getRest(app.wikiSite).getPageSummary(result.tfa.apiTitle)
-                } else {
-                    result.tfa
-                }
-            } else {
-                val response = ServiceFactory.get(mainPageTitle.wikiSite).parseTextForMainPage(mainPageTitle.prefixedText)
-                ServiceFactory.getRest(app.wikiSite).getPageSummary(findFeaturedArticleTitle(response.text))
-            }
+            // No aggregated feed (feed/featured) is available on this wiki, so there's no
+            // "featured article" pick to fetch directly; fall back to scraping the first
+            // meaningful link off the actual Main Page instead.
+            val response = ServiceFactory.get(mainPageTitle.wikiSite).parseTextForMainPage(mainPageTitle.prefixedText)
+            val summary = ServiceFactory.getRest(app.wikiSite).getPageSummary(findFeaturedArticleTitle(response.text))
 
             val pageTitle = summary.getPageTitle(app.wikiSite)
             pageTitle.displayText = summary.displayTitle

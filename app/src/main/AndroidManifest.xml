@@ -182,10 +182,6 @@
             android:name=".settings.LicenseActivity"/>
 
         <activity
-            android:name=".feed.news.NewsActivity"
-            android:label="@string/view_card_news_title"/>
-
-        <activity
             android:name=".descriptions.DescriptionEditActivity"
             android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="adjustResize" />
@@ -225,9 +221,6 @@
         <activity
             android:name=".feed.topread.TopReadArticlesActivity"
             android:theme="@style/AppTheme.ActionBar"/>
-
-        <activity android:name=".feed.onthisday.OnThisDayActivity"
-            android:configChanges="orientation|screenSize"/>
 
         <activity android:name=".feed.configure.ConfigureActivity"
             android:label="@string/feed_configure_activity_title"/>

@@ -388,7 +388,7 @@
     <string name="format_error_server_message">Message: \"%s\"</string>
     <string name="address_copied">Address copied to clipboard.</string>
     <string name="text_copied">Text copied to clipboard.</string>
-    <string name="button_continue_to_article">Read article</string>
+    <string name="button_continue_to_article">Read destination</string>
     <string name="button_continue_to_talk_page">Open talk page</string>
     <string name="button_continue_to_disambiguation">View similar pages</string>
     <string name="link_preview_disambiguation_description">This title relates to more than one page:</string>
@@ -838,8 +838,6 @@
     <string name="view_top_read_card_pageviews_m_suffix">%d M</string>
     <string name="view_next_random_article">Load another random article</string>
     <string name="view_main_page_card_title">Today on Wikipedia</string>
-    <string name="view_main_page_card_action">View main page</string>
-    <string name="view_featured_image_card_title">Picture of the day</string>
     <string name="view_featured_image_card_download">Download</string>
     <string name="view_featured_image_card_share">Share</string>
     <string name="menu_feed_card_dismiss">Hide this card</string>
@@ -847,11 +845,9 @@
     <string name="menu_feed_card_edit_card_languages">Edit card languages</string>
     <string name="menu_feed_overflow_label">More options</string>
 
-    <string name="feed_featured_image_share_subject">Featured image from Wikimedia Commons</string>
     <string name="feed">Explore</string>
     <string name="home">Home</string>
     <string name="view_static_card_icon_content_description">Card icon</string>
-    <string name="view_card_news_title">In the news</string>
     <plurals name="view_continue_reading_card_subtitle">
         <item quantity="one">yesterday</item>
         <item quantity="other">%d days ago</item>
@@ -870,15 +866,10 @@
     <string name="feed_configure_menu_select_all">Show all</string>
     <string name="feed_configure_menu_deselect_all">Hide all</string>
     <string name="feed_configure_language_warning">Note that not all card types are available in all Wikipedia languages. Edit your selected languages in Settings.</string>
-    <string name="feed_item_type_news">Articles about current events</string>
-    <string name="feed_item_type_on_this_day">Events in history on this day</string>
     <string name="feed_item_type_because_you_read">Suggestions based on a recently read article from your history</string>
-    <string name="feed_item_type_featured_article">Daily featured article on Wikipedia</string>
     <string name="feed_item_type_word_of_the_day">Wiktionary\'s word of the day</string>
     <string name="feed_item_type_foreign_word_of_the_day">Wiktionary\'s foreign word of the day</string>
     <string name="feed_item_type_trending">Daily most-viewed articles</string>
-    <string name="feed_item_type_featured_image">Daily featured image from Wikimedia Commons</string>
-    <string name="feed_item_type_main_page">Main page of Wikipedia with daily featured content</string>
     <string name="feed_item_type_randomizer">Generate random articles to read</string>
     <string name="feed_item_type_suggested_edits">Suggestions to add content to Wikipedia</string>
     <string name="feed_item_type_places">Nearby articles based on the current location</string>
