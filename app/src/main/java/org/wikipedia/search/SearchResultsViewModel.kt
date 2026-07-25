@@ -120,11 +120,11 @@ class SearchResultsViewModel : ViewModel() {
                     // prefix + fulltext search results for at most 3 results.
                     val response = ServiceFactory.get(wikiSite).prefixSearchResponse(term, lexicalBatchSize, 0)
                     lastXSearchIdPrefix = response.headers()["x-search-id"] ?: ""
-                    lexicalSearchResults.addAll(buildList(response.body(), wikiSite, SearchResult.SearchResultType.PREFIX))
+                    lexicalSearchResults.addAll(buildList(response.body(), invokeSource, wikiSite, SearchResult.SearchResultType.PREFIX))
                     if (lexicalSearchResults.size < lexicalBatchSize) {
                         val fullTextResponse = ServiceFactory.get(wikiSite).fullTextSearchResponse(term, lexicalBatchSize, 0)
                         lastXSearchIdFullText = fullTextResponse.headers()["x-search-id"] ?: ""
-                        lexicalSearchResults.addAll(buildList(fullTextResponse.body(), wikiSite, SearchResult.SearchResultType.FULL_TEXT))
+                        lexicalSearchResults.addAll(buildList(fullTextResponse.body(), invokeSource, wikiSite, SearchResult.SearchResultType.FULL_TEXT))
                     }
                     lexicalSearchResults
                 }
@@ -146,7 +146,7 @@ class SearchResultsViewModel : ViewModel() {
                     } else {
                         val response = ServiceFactory.get(wikiSite).fullTextSearchResponse(term, semanticBatchSize, 0, isSemantic = true)
                         lastXSearchIdSemantic = response.headers()["x-search-id"] ?: ""
-                        buildList(response.body(), wikiSite, type = SearchResult.SearchResultType.SEMANTIC)
+                        buildList(response.body(), invokeSource, wikiSite, type = SearchResult.SearchResultType.SEMANTIC)
                     }
                 }
             }
@@ -267,11 +267,13 @@ class SearchResultsViewModel : ViewModel() {
     companion object {
         fun buildList(
             response: MwQueryResponse?,
+            invokeSource: Constants.InvokeSource,
             wikiSite: WikiSite,
             type: SearchResult.SearchResultType
         ): List<SearchResult> {
             return response?.query?.pages?.let { list ->
-                list.sortedBy { it.index }
+                (if (invokeSource == Constants.InvokeSource.PLACES)
+                    list.filter { it.coordinates != null } else list).sortedBy { it.index }
                     .map { SearchResult(it, wikiSite, it.coordinates, type, indexInApiCall = it.index) }
             } ?: emptyList()
         }

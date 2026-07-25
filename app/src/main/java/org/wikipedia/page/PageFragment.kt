@@ -27,6 +27,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.net.toUri
 import androidx.core.view.forEach
+import androidx.core.widget.TextViewCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -53,6 +54,7 @@ import org.wikipedia.analytics.eventplatform.ArticleFindInPageInteractionEvent
 import org.wikipedia.analytics.eventplatform.ArticleInteractionEvent
 import org.wikipedia.analytics.eventplatform.DonorExperienceEvent
 import org.wikipedia.analytics.eventplatform.EventPlatformClient
+import org.wikipedia.analytics.eventplatform.PlacesEvent
 import org.wikipedia.analytics.eventplatform.WatchlistAnalyticsHelper
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.bridge.CommunicationBridge
@@ -91,6 +93,7 @@ import org.wikipedia.page.references.PageReferences
 import org.wikipedia.page.references.ReferenceDialog
 import org.wikipedia.page.shareafact.ShareHandler
 import org.wikipedia.page.tabs.Tab
+import org.wikipedia.places.PlacesActivity
 import org.wikipedia.readinglist.LongPressMenu
 import org.wikipedia.readinglist.ReadingListBehaviorsUtil
 import org.wikipedia.readinglist.database.ReadingListPage
@@ -864,6 +867,17 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                             startActivity(EditHistoryListActivity.newIntent(requireContext(), this))
                         }
                     }
+                    "coordinate" -> {
+                        model.page?.let { page ->
+                            val location = page.pageProperties.geo
+                            if (location != null) {
+                                PlacesEvent.logAction("places_click", "article_footer")
+                                requireActivity().startActivity(PlacesActivity.newIntent(requireContext(), page.title, location))
+                            } else {
+                                FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
+                            }
+                        }
+                    }
                     "pageIssues" -> {
                         val array = payload["payload"]
                         if (array != null && array.jsonArray.isNotEmpty() && model.title != null) {
@@ -941,6 +955,8 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
             editHandler.setPage(model.page)
             webView.visibility = View.VISIBLE
         }
+
+        maybeShowAnnouncement()
 
         bridge.onMetadataReady()
         // Explicitly set the top margin (even though it might have already been set in the setup
@@ -1053,6 +1069,12 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                 }
                 PageActionItem.EDIT_ARTICLE -> {
                     it.setCompoundDrawablesWithIntrinsicBounds(0, PageActionItem.editArticleIcon(model.page?.pageProperties?.canEdit != true), 0, 0)
+                }
+                PageActionItem.VIEW_ON_MAP -> {
+                    val geoAvailable = model.page?.pageProperties?.geo != null
+                    val tintColor = ResourceUtil.getThemedColorStateList(requireContext(), if (geoAvailable) R.attr.primary_color else R.attr.inactive_color)
+                    it.setTextColor(tintColor)
+                    TextViewCompat.setCompoundDrawableTintList(it, tintColor)
                 }
                 else -> { }
             }
@@ -1451,6 +1473,18 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
         override fun onEditArticleSelected() {
             editHandler.startEditingArticle()
             articleInteractionEvent?.logEditArticleClick()
+        }
+
+        override fun onViewOnMapSelected() {
+            title?.let {
+                val location = page?.pageProperties?.geo
+                if (location != null) {
+                    PlacesEvent.logAction("places_click", "article_more_menu")
+                    requireActivity().startActivity(PlacesActivity.newIntent(requireContext(), it, location))
+                } else {
+                    FeedbackUtil.showMessage(this@PageFragment, getString(R.string.action_item_view_on_map_unavailable))
+                }
+            }
         }
 
         override fun forwardClick() {

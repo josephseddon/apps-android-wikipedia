@@ -11,6 +11,7 @@ import org.wikipedia.feed.featured.FeaturedArticleCard
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.CardType
 import org.wikipedia.feed.offline.OfflineCard
+import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.progress.ProgressCard
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
@@ -92,6 +93,10 @@ abstract class FeedCoordinatorBase(private val context: Context) {
                 FeedContentType.RANDOM.isEnabled = false
                 FeedContentType.saveState()
             }
+            card.type() == CardType.PLACES -> {
+                FeedContentType.PLACES.isEnabled = false
+                FeedContentType.saveState()
+            }
             else -> {
                 addHiddenCard(card)
             }
@@ -105,6 +110,10 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         when {
             card.type() === CardType.RANDOM -> {
                 FeedContentType.RANDOM.isEnabled = true
+                FeedContentType.saveState()
+            }
+            card.type() == CardType.PLACES -> {
+                FeedContentType.PLACES.isEnabled = true
                 FeedContentType.saveState()
             }
             else -> unHideCard(card)
@@ -250,6 +259,7 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {
         return pendingClient is AnnouncementClient ||
                 pendingClient is BecauseYouReadClient ||
+                pendingClient is PlacesFeedClient ||
                 pendingClient == null
     }
 

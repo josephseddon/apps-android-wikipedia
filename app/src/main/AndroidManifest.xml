@@ -317,6 +317,12 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
         <activity
+            android:name=".places.PlacesActivity" />
+
+        <activity
+            android:name=".places.PlacesFilterActivity"/>
+
+        <activity
             android:name=".talk.template.TalkTemplatesActivity"
             android:theme="@style/AppTheme" />
 

@@ -6,9 +6,8 @@ import org.wikipedia.R
 import org.wikipedia.feed.accessibility.AccessibilityCardClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
+import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.random.RandomClient
-import org.wikipedia.feed.wotd.ForeignWordOfTheDayClient
-import org.wikipedia.feed.wotd.WordOfTheDayClient
 import org.wikipedia.model.EnumCode
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
@@ -18,16 +17,6 @@ enum class FeedContentType(private val code: Int,
                            @StringRes val subtitleId: Int,
                            val isPerLanguage: Boolean,
                            var showInConfig: Boolean = true) : EnumCode {
-    WORD_OF_THE_DAY(11, R.string.view_word_of_the_day_card_title, R.string.feed_item_type_word_of_the_day, true) {
-        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
-            return if (isEnabled) WordOfTheDayClient(coroutineScope) else null
-        }
-    },
-    FOREIGN_WORD_OF_THE_DAY(12, R.string.view_foreign_word_of_the_day_card_title, R.string.feed_item_type_foreign_word_of_the_day, true) {
-        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
-            return if (isEnabled) ForeignWordOfTheDayClient(coroutineScope) else null
-        }
-    },
     BECAUSE_YOU_READ(8, R.string.view_because_you_read_card_title, R.string.feed_item_type_because_you_read, false) {
         override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) BecauseYouReadClient(coroutineScope) else null
@@ -36,6 +25,11 @@ enum class FeedContentType(private val code: Int,
     RANDOM(5, R.string.view_random_card_title, R.string.feed_item_type_randomizer, true) {
         override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) RandomClient(coroutineScope) else null
+        }
+    },
+    PLACES(11, R.string.places_title, R.string.feed_item_type_places, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) PlacesFeedClient(coroutineScope) else null
         }
     },
     ACCESSIBILITY(10, 0, 0, false, false) {

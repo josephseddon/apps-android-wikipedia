@@ -9,4 +9,5 @@ sealed class LinkPreviewViewState {
     data class Error(val throwable: Throwable) : LinkPreviewViewState()
     data class Content(val data: PageSummary) : LinkPreviewViewState()
     data class Gallery(val data: List<MwQueryPage>) : LinkPreviewViewState()
+    data class Watch(val data: Pair<Boolean, String>) : LinkPreviewViewState()
 }
