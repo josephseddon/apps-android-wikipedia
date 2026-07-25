@@ -26,11 +26,6 @@ enum class FeedContentType(private val code: Int,
             return if (isEnabled) BecauseYouReadClient(coroutineScope) else null
         }
     },
-    RANDOM(5, R.string.view_random_card_title, R.string.feed_item_type_randomizer, true) {
-        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
-            return if (isEnabled) RandomClient(coroutineScope) else null
-        }
-    },
     PLACES(11, R.string.places_title, R.string.feed_item_type_places, false) {
         override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) PlacesFeedClient(coroutineScope) else null
@@ -54,6 +49,11 @@ enum class FeedContentType(private val code: Int,
     DISCOVER(15, R.string.view_discover_card_title, R.string.feed_item_type_discover, false) {
         override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) DiscoverClient(coroutineScope) else null
+        }
+    },
+    RANDOM(5, R.string.view_random_card_title, R.string.feed_item_type_randomizer, true) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) RandomClient(coroutineScope) else null
         }
     },
     ACCESSIBILITY(10, 0, 0, false, false) {
