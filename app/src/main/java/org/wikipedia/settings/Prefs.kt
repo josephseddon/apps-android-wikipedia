@@ -1,6 +1,16 @@
 package org.wikipedia.settings
 
+import android.content.SharedPreferences
 import android.location.Location
+import androidx.annotation.StringRes
+import androidx.preference.PreferenceManager
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.logging.HttpLoggingInterceptor
@@ -14,6 +24,7 @@ import org.wikipedia.analytics.eventplatform.AppSessionEvent
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.donate.DonationResult
 import org.wikipedia.donate.donationreminder.DonationReminderConfig
+import org.wikipedia.feed.personalization.homepreference.HomePreferenceType
 import org.wikipedia.games.onthisday.OnThisDayGameNotificationState
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageTitle
@@ -108,9 +119,9 @@ object Prefs {
         PrefsIoUtil.remove(R.string.preference_key_tabs)
     }
 
-    var hiddenCards: Set<String>
-        get() = JsonUtil.decodeFromString<Set<String>>(PrefsIoUtil.getString(R.string.preference_key_feed_hidden_cards, null))
-            ?: emptySet()
+    var hiddenCards: List<String>
+        get() = JsonUtil.decodeFromString<List<String>>(PrefsIoUtil.getString(R.string.preference_key_feed_hidden_cards, null))
+            ?: emptyList()
         set(cards) = PrefsIoUtil.setString(R.string.preference_key_feed_hidden_cards, JsonUtil.encodeToString(cards))
 
     var sessionData
@@ -391,7 +402,7 @@ object Prefs {
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_history_offline_articles_toast, true)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_history_offline_articles_toast, value)
 
-    var loggedOutInBackground
+    var queueLoggedOutInBackgroundDialog
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_logged_out_in_background, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_logged_out_in_background, value)
 
@@ -710,6 +721,47 @@ object Prefs {
             PrefsIoUtil.setString(R.string.preference_key_places_last_location_and_zoom_level, locationAndZoomLevelString)
         }
 
+    val placesLastLocationFlow: Flow<Location?> = callbackFlow {
+        val key = WikipediaApp.instance.getString(R.string.preference_key_places_last_location_and_zoom_level)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(WikipediaApp.instance)
+        trySend(placesLastLocationAndZoomLevel?.first)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            if (changedKey == key) {
+                trySend(placesLastLocationAndZoomLevel?.first)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.distinctUntilChanged { old, new ->
+        old?.latitude == new?.latitude && old?.longitude == new?.longitude
+    }
+
+    /**
+     * Emits the key of any preference as it changes. Backed by a single shared
+     * [SharedPreferences.OnSharedPreferenceChangeListener], so observing reactive preferences
+     * costs one shared listener rather than a dedicated [callbackFlow] per key.
+     */
+    val preferenceKeyChangeFlow: Flow<String> = callbackFlow {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(WikipediaApp.instance)
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
+            changedKey?.let { trySend(it) }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
+    /**
+     * Emits once on subscription (with the current values) and again whenever any of the given
+     * preference [keys] changes, so collectors can re-read the current values reactively.
+     */
+    fun observeKeys(@StringRes vararg keys: Int): Flow<Unit> {
+        val keyStrings = keys.map { WikipediaApp.instance.getString(it) }.toSet()
+        return preferenceKeyChangeFlow
+            .filter { it in keyStrings }
+            .onStart { emit("") }
+            .map { }
+    }
+
     var recentUsedTemplates
         get() = JsonUtil.decodeFromString<Set<PageTitle>>(PrefsIoUtil.getString(R.string.preference_key_recent_used_templates, null)) ?: emptySet()
         set(set) = PrefsIoUtil.setString(R.string.preference_key_recent_used_templates, JsonUtil.encodeToString(set))
@@ -919,4 +971,42 @@ object Prefs {
     var readingChallengeWidgetFastCycle
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_reading_challenge_widget_fast_cycle, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_reading_challenge_widget_fast_cycle, value)
+
+    var isExploreFeedUpdatePromptShown
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_explore_feed_update_prompt_shown, false)
+        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_explore_feed_update_prompt_shown, value)
+
+    var homeForYouModulesToday
+        get() = PrefsIoUtil.getString(R.string.preference_key_home_for_you_modules_today, "")!!
+        set(value) = PrefsIoUtil.setString(R.string.preference_key_home_for_you_modules_today, value)
+
+    var homeLanguageCode
+        get() = PrefsIoUtil.getString(R.string.preference_key_home_language_code, WikipediaApp.instance.appOrSystemLanguageCode)!!
+        set(value) = PrefsIoUtil.setString(R.string.preference_key_home_language_code, value)
+
+    var homePreferenceSelection: HomePreferenceType
+        get() = PrefsIoUtil.getString(R.string.preference_key_home_preference_selection, null)?.let {
+            HomePreferenceType.valueOf(it)
+        } ?: HomePreferenceType.COMMUNITY
+        set(value) = PrefsIoUtil.setString(R.string.preference_key_home_preference_selection, value.name)
+
+    var isHomeSwipeToExplorePromptShown
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_home_swipe_to_explore_prompt_shown, false)
+        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_home_swipe_to_explore_prompt_shown, value)
+
+    var isHomeFeedUpdateTooltipShown
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_home_feed_update_tooltip_shown, false)
+        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_home_feed_update_tooltip_shown, value)
+
+    var searchWidgetInstallPromptShown
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_search_widget_install_prompt_shown, false)
+        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_search_widget_install_prompt_shown, value)
+
+    var randomizerShakePromptShown
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_randomizer_shake_prompt_shown, false)
+        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_randomizer_shake_prompt_shown, value)
+
+    var homeFeedSurveyShown
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_home_feed_survey_shown, false)
+        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_home_feed_survey_shown, value)
 }

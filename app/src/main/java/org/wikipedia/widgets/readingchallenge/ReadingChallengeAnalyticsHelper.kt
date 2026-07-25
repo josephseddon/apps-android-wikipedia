@@ -15,17 +15,9 @@ object ReadingChallengeAnalyticsHelper {
             ReadingChallengeState.NotLiveYet -> logHeartbeat(elementId = "not_yet_live")
             ReadingChallengeState.EnrolledNotStarted -> logHeartbeat(elementId = "enrolled_not_started")
             ReadingChallengeState.ChallengeRemoved -> logHeartbeat(elementId = "challenge_removed", includeStreak = true)
+            ReadingChallengeState.RandomArticle -> logRandomArticleHeartbeat()
             else -> {}
         }
-    }
-
-    fun logAppOpenFromWidget() {
-        TestKitchenAdapter.client.getInstrument("apps-open")
-            .submitInteraction(
-                action = "app_open",
-                actionSource = "widget",
-                actionSubtype = "reading_challenge"
-            )
     }
 
     private fun logHeartbeat(elementId: String, includeStreak: Boolean = false) {
@@ -34,6 +26,13 @@ object ReadingChallengeAnalyticsHelper {
             actionSource = "widget_challenge",
             elementId = elementId,
             actionContext = if (includeStreak) mapOf("streak_count" to Prefs.readingChallengeStreak) else null
+        )
+    }
+
+    private fun logRandomArticleHeartbeat() {
+        TestKitchenAdapter.client.getInstrument("apps-widget").submitInteraction(
+            action = "heartbeat",
+            actionSource = "widget_random_article"
         )
     }
 }
