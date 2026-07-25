@@ -153,7 +153,7 @@
     <string name="edit_section_captcha_hint">Repeat words from above</string>
     <string name="title_captcha">Enter CAPTCHA</string>
     <string name="edit_section_captcha_reload">Tap CAPTCHA to reload</string>
-    <string name="nav_item_login">Log in to Wikipedia</string>
+    <string name="nav_item_login">Log in to Wikivoyage</string>
     <string name="login_username_hint">Username</string>
     <string name="login_password_hint">Password</string>
     <string name="account_creation_password_hint">Password</string>
@@ -179,7 +179,7 @@
     <string name="logout_prompt">This will log you out on all devices where you are currently logged in. Do you want to continue?</string>
     <string name="logout_dialog_cancel_button_text">Cancel</string>
     <string name="logged_out_in_background_title">Logged out</string>
-    <string name="logged_out_in_background_dialog">You have been logged out of Wikipedia. Would you like to log in again?</string>
+    <string name="logged_out_in_background_dialog">You have been logged out of Wikivoyage. Would you like to log in again?</string>
     <string name="logged_out_in_background_login">Log in</string>
     <string name="logged_out_in_background_cancel">Cancel</string>
     <string name="account_vanish_request_title">Vanish account</string>
@@ -194,7 +194,7 @@
     <string name="wp_stylized"><![CDATA[<big>W</big>IKIPEDI<big>A</big>]]></string>
     <string name="create_account_username_hint">Username</string>
     <string name="login_dont_have_account">Don\'t have an account?</string>
-    <string name="login_join_wikipedia">Join Wikipedia</string>
+    <string name="login_join_wikipedia">Join Wikivoyage</string>
     <string name="login_forgot_password">Forgot your password?</string>
     <string name="create_account_already_have">Already have an account?</string>
     <string name="create_account_activity_title">Create an account</string>
@@ -605,11 +605,11 @@
     <string name="reading_list_confirm_remove_article_from_offline_message">%s will no longer be available offline for all reading lists:</string>
     <string name="reading_lists_sync_reminder_title">Turn on reading list syncing?</string>
     <string name="reading_lists_sync_reminder_text"><![CDATA[Articles saved to reading lists can now be synced to your Wikipedia account. <a href="https://www.mediawiki.org/wiki/Special:MyLanguage/Wikimedia_Apps/Android_FAQ#Synced_reading_lists">Learn more</a>]]></string>
-    <string name="reading_lists_login_reminder_text_with_link"><![CDATA[Reading lists can now be synced across devices. Log in to your Wikipedia account and allow your lists to be saved. <a href="https://www.mediawiki.org/wiki/Special:MyLanguage/Wikimedia_Apps/Android_FAQ#Synced_reading_lists">Learn more</a>]]></string>
+    <string name="reading_lists_login_reminder_text_with_link"><![CDATA[Reading lists can now be synced across devices. Log in to your Wikivoyage account and allow your lists to be saved. <a href="https://www.mediawiki.org/wiki/Special:MyLanguage/Wikimedia_Apps/Android_FAQ#Synced_reading_lists">Learn more</a>]]></string>
     <string name="reading_lists_sync_reminder_action">Enable syncing</string>
     <string name="reading_list_login_reminder_title">Sync reading lists</string>
-    <string name="reading_lists_login_reminder_text">Reading lists can now be synced across devices. Log in to your Wikipedia account and allow your lists to be saved.</string>
-    <string name="reading_lists_login_button">Log in / join Wikipedia</string>
+    <string name="reading_lists_login_reminder_text">Reading lists can now be synced across devices. Log in to your Wikivoyage account and allow your lists to be saved.</string>
+    <string name="reading_lists_login_button">Log in / join Wikivoyage</string>
     <string name="reading_lists_ignore_button">Not now</string>
     <string name="reading_lists_confirm_remote_delete_yes">Yes</string>
     <string name="reading_lists_confirm_remote_delete_no">No</string>
@@ -918,7 +918,7 @@
     <string name="description_edit_help_about_wikidata">About Wikidata</string>
     <string name="description_edit_help_wikidata_guide">Wikidata guide for writing descriptions</string>
     <string name="wikidata_description_guide_url">https://www.wikidata.org/wiki/Special:MyLanguage/Help:Description#Guidelines_for_descriptions_in_English</string>
-    <string name="description_edit_anon_limit">Thanks for your continued interest in editing article descriptions! To make additional edits, please log in to your Wikipedia account.</string>
+    <string name="description_edit_anon_limit">Thanks for your continued interest in editing article descriptions! To make additional edits, please log in to your Wikivoyage account.</string>
     <string name="description_edit_license_notice"><![CDATA[By changing the article description, I agree to the <a href="%1$s">Terms of Use</a> and to irrevocably release my contributions under the <a href="%2$s">Creative Commons CC0</a> license.]]></string>
     <string name="description_edit_helper_text_lowercase_warning">usually begin with a lowercase letter</string>
     <string name="description_edit_voice_input_description">Voice input</string>
@@ -1128,8 +1128,8 @@
     <string name="suggested_edits_contribution_type_title">%1$d %2$s</string>
     <string name="suggested_edits_contribution_date_yesterday_text">Yesterday</string>
     <string name="suggested_edits_encourage_account_creation_title">Did you know that everyone can edit Wikipedia?</string>
-    <string name="suggested_edits_encourage_account_creation_message">Suggested edits is a new way to edit Wikipedia on Android. It helps you make small but vital contributions to Wikipedia.\nOur goal is to make editing easier and more accessible for everyone! Log in or join Wikipedia to get started.</string>
-    <string name="suggested_edits_encourage_account_creation_login_button">Log in / join Wikipedia</string>
+    <string name="suggested_edits_encourage_account_creation_message">Suggested edits is a new way to edit Wikipedia on Android. It helps you make small but vital contributions to Wikipedia.\nOur goal is to make editing easier and more accessible for everyone! Log in or join Wikivoyage to get started.</string>
+    <string name="suggested_edits_encourage_account_creation_login_button">Log in / join Wikivoyage</string>
     <string name="suggested_edits_contribution_type_image_tag">Image tag</string>
     <string name="suggested_edits_contribution_current_revision_text">Your edit is currently live on Wikipedia</string>
     <string name="suggested_card_more_edits">More suggested edits</string>
@@ -1190,7 +1190,7 @@
     <string name="edit_summary_added_caption">Added caption</string>
     <string name="edit_summary_added_image_and_caption">Added image and caption</string>
     <string name="edit_published_view">View</string>
-    <string name="activity_tab_logged_out_title">Log in or create an account to view your activity on the Wikipedia app</string>
+    <string name="activity_tab_logged_out_title">Log in or create an account to view your activity on the Wikivoyage app</string>
     <string name="activity_tab_user_reading">%s\'s reading</string>
     <string name="activity_tab_on_wikipedia_android">On Wikipedia Android</string>
     <string name="activity_tab_weekly_time_spent_hm">%1$dh %2$dm</string>
@@ -1447,7 +1447,7 @@
     <!-- /Templates -->
 
     <string name="main_drawer_help">Help</string>
-    <string name="main_drawer_login">Log in / join Wikipedia</string>
+    <string name="main_drawer_login">Log in / join Wikivoyage</string>
     <string name="main_tooltip_action_button">Get started</string>
     <string name="main_tooltip_watchlist_title">Watchlist</string>
     <string name="main_tooltip_watchlist_text"><![CDATA[Find articles and pages you previously added to your watchlist in the More menu under <b>Watchlist</b>.]]></string>
@@ -2027,7 +2027,7 @@
     <string name="year_in_review_slide_geo_body"><![CDATA[The country that is closest to many articles you\'ve read seems to be: %1$s, based on articles like <b>%2$s</b> and <b>%3$s</b>.]]></string>
     <string name="year_in_review_login_dialog_title">Log in for personalization?</string>
     <string name="year_in_review_login_dialog_body">Logging in gives you access to personalized insights. You can still see collective insights without logging in.</string>
-    <string name="year_in_review_login_dialog_positive">Log in / Join Wikipedia</string>
+    <string name="year_in_review_login_dialog_positive">Log in / Join Wikivoyage</string>
     <string name="year_in_review_login_dialog_negative">Continue without logging in</string>
     <plurals name="year_in_review_slide_top_articles_headline">
         <item quantity="one">Your top article</item>
@@ -2400,7 +2400,7 @@
     <string name="reading_challenge_onboarding_prompt_title">Log in to join the challenge</string>
     <string name="reading_challenge_onboarding_prompt_message">Log in or create an account to track your progress towards the reading challenge.</string>
     <string name="reading_challenge_onboarding_prompt_no_thanks">No thanks</string>
-    <string name="reading_challenge_onboarding_prompt_login">Log in / Join Wikipedia</string>
+    <string name="reading_challenge_onboarding_prompt_login">Log in / Join Wikivoyage</string>
     <string name="reading_challenge_install_prompt_title">Install the 25-day reading challenge widget</string>
     <string name="reading_challenge_install_prompt_message">Baby Globe is cheering you on. Add the Reading Challenge widget to track your progress from your homescreen.</string>
     <string name="reading_challenge_install_prompt_got_it">Got it</string>
