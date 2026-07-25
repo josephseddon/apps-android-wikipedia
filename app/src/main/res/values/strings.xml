@@ -840,7 +840,10 @@
     <string name="view_off_the_beaten_path_card_title">Off the Beaten Path</string>
     <string name="view_featured_travel_topic_card_title">Featured Travel Topic</string>
     <string name="view_discover_card_title">Discover</string>
-    <string name="view_wikivoyage_archive_action">See past picks</string>
+    <string name="view_destination_of_the_month_archive_action">See past destinations</string>
+    <string name="view_off_the_beaten_path_archive_action">See past hidden gems</string>
+    <string name="view_featured_travel_topic_archive_action">See past topics</string>
+    <string name="view_discover_archive_action">See past facts</string>
     <string name="view_featured_image_card_download">Download</string>
     <string name="view_featured_image_card_share">Share</string>
     <string name="menu_feed_card_dismiss">Hide this card</string>

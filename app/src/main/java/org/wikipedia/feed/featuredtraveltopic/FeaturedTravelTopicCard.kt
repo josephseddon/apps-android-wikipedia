@@ -23,7 +23,7 @@ class FeaturedTravelTopicCard(
     }
 
     override fun footerActionText(): String {
-        return L10nUtil.getString(wikiSite().languageCode, R.string.view_wikivoyage_archive_action)
+        return L10nUtil.getString(wikiSite().languageCode, R.string.view_featured_travel_topic_archive_action)
     }
 
     override fun type(): CardType {

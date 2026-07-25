@@ -23,7 +23,7 @@ class OffTheBeatenPathCard(
     }
 
     override fun footerActionText(): String {
-        return L10nUtil.getString(wikiSite().languageCode, R.string.view_wikivoyage_archive_action)
+        return L10nUtil.getString(wikiSite().languageCode, R.string.view_off_the_beaten_path_archive_action)
     }
 
     override fun type(): CardType {

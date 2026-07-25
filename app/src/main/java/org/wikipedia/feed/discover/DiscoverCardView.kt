@@ -73,7 +73,7 @@ class DiscoverCardView(context: Context) : DefaultFeedCardView<DiscoverCard>(con
             )
         }
         binding.viewDiscoverCardFooter.setFooterActionText(
-            context.getString(R.string.view_wikivoyage_archive_action), card.wikiSite().languageCode
+            context.getString(R.string.view_discover_archive_action), card.wikiSite().languageCode
         )
     }
 }

@@ -23,7 +23,7 @@ class DestinationOfTheMonthCard(
     }
 
     override fun footerActionText(): String {
-        return L10nUtil.getString(wikiSite().languageCode, R.string.view_wikivoyage_archive_action)
+        return L10nUtil.getString(wikiSite().languageCode, R.string.view_destination_of_the_month_archive_action)
     }
 
     override fun type(): CardType {
