@@ -16,7 +16,6 @@ import kotlinx.coroutines.*
 import org.wikipedia.BuildConfig
 import org.wikipedia.R
 import org.wikipedia.page.PageTitle
-import org.wikipedia.util.DateUtil.getFeedCardDateString
 import org.wikipedia.util.log.L
 import java.io.File
 
@@ -67,10 +66,6 @@ object ShareUtil {
             }
             onShared?.invoke()
         }
-    }
-
-    fun getFeaturedImageShareSubject(context: Context, age: Int): String {
-        return context.getString(R.string.feed_featured_image_share_subject) + " | " + getFeedCardDateString(age)
     }
 
     private fun buildImageShareChooserIntent(context: Context, subject: String,

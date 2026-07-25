@@ -13,27 +13,25 @@ import org.wikipedia.language.AppLanguageLookUpTable
 import org.wikipedia.util.UriUtil
 
 /**
- * The base URL and Wikipedia language code for a MediaWiki site. Examples:
+ * The base URL and Wiktionary language code for a MediaWiki site. Examples:
  *
  *
  * <lh>Name: scheme / authority / language code</lh>
- *  * English Wikipedia: HTTPS / en.wikipedia.org / en
- *  * Chinese Wikipedia: HTTPS / zh.wikipedia.org / zh-hans or zh-hant
+ *  * English Wiktionary: HTTPS / en.wiktionary.org / en
+ *  * Chinese Wiktionary: HTTPS / zh.wiktionary.org / zh-hans or zh-hant
  *  * Meta-Wiki: HTTPS / meta.wikimedia.org / (none)
- *  * Test Wikipedia: HTTPS / test.wikipedia.org / test
- *  * Võro Wikipedia: HTTPS / fiu-vro.wikipedia.org / fiu-vro
- *  * Simple English Wikipedia: HTTPS / simple.wikipedia.org / simple
- *  * Simple English Wikipedia (beta cluster mirror): HTTP / simple.wikipedia.beta.wmflabs.org / simple
+ *  * Test Wiktionary: HTTPS / test.wiktionary.org / test
+ *  * Simple English Wiktionary (beta cluster mirror): HTTP / simple.wiktionary.beta.wmflabs.org / simple
  *  * Development: HTTP / 192.168.1.11:8080 / (none)
  *
  *
  * **As shown above, the language code or mapping is part of the authority:**
  *
  * <lh>Validity: authority / language code</lh>
- *  * Correct: "test.wikipedia.org" / "test"
- *  * Correct: "wikipedia.org", ""
- *  * Correct: "no.wikipedia.org", "nb"
- *  * Incorrect: "wikipedia.org", "test"
+ *  * Correct: "test.wiktionary.org" / "test"
+ *  * Correct: "wiktionary.org", ""
+ *  * Correct: "no.wiktionary.org", "nb"
+ *  * Incorrect: "wiktionary.org", "test"
  *
  */
 @Serializable
@@ -49,7 +47,7 @@ data class WikiSite(
         if ((BASE_DOMAIN == authority || ("www.$BASE_DOMAIN") == authority) &&
             tempUri.path?.startsWith("/wiki") == true
         ) {
-            // Special case for Wikipedia only: assume English subdomain when none given.
+            // Assume English subdomain when none given.
             authority = "en.$BASE_DOMAIN"
         }
 
@@ -79,7 +77,7 @@ data class WikiSite(
             languageCode = WikipediaApp.instance.appOrSystemLanguageCode
         }
 
-        // Use default subdomain in authority to prevent error when requesting endpoints. e.g. zh-tw.wikipedia.org
+        // Use default subdomain in authority to prevent error when requesting endpoints. e.g. zh-tw.wiktionary.org
         if (authority.contains(BASE_DOMAIN) && subdomain().isNotEmpty()) {
             authority = subdomain() + "." + BASE_DOMAIN
         }
@@ -134,7 +132,7 @@ data class WikiSite(
 
     companion object {
         const val DEFAULT_SCHEME = "https"
-        const val BASE_DOMAIN = "wikipedia.org"
+        const val BASE_DOMAIN = "wiktionary.org"
         private var DEFAULT_BASE_URL: String? = null
 
         fun supportedAuthority(authority: String): Boolean {
@@ -168,7 +166,7 @@ data class WikiSite(
          * logic that depends on a WikipediaApp instance.
          */
         fun preview(languageCode: String = "en"): WikiSite {
-            return WikiSite("https://$languageCode.wikipedia.org/".toUri(), languageCode)
+            return WikiSite("https://$languageCode.wiktionary.org/".toUri(), languageCode)
         }
 
         private fun languageCodeToSubdomain(languageCode: String): String {
@@ -182,8 +180,8 @@ data class WikiSite(
                 parts.size == minLengthForSubdomain && parts[0] == "m"
             ) {
                 // ""
-                // wikipedia.org
-                // m.wikipedia.org
+                // wiktionary.org
+                // m.wiktionary.org
                 ""
             } else parts[0]
         }

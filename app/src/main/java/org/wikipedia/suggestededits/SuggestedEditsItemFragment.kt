@@ -18,10 +18,6 @@ abstract class SuggestedEditsItemFragment : Fragment() {
         retainInstance = true
     }
 
-    fun parent(): SuggestedEditsCardsFragment {
-        return requireActivity().supportFragmentManager.fragments[0] as SuggestedEditsCardsFragment
-    }
-
     open fun publishEnabled(): Boolean {
         return true
     }

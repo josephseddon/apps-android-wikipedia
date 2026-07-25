@@ -50,7 +50,6 @@ class OnboardingPageView constructor(context: Context, attrs: AttributeSet? = nu
                 val showListView = getBoolean(R.styleable.OnboardingPageView_showListView, false)
                 val background = getDrawable(R.styleable.OnboardingPageView_background)
                 val imageSize = getDimension(R.styleable.OnboardingPageView_imageSize, 0f)
-                val showPatrollerTasksButtons = getBoolean(R.styleable.OnboardingPageView_patrollerTasksButtons, false)
                 background?.let { setBackground(it) }
                 binding.imageViewCentered.isVisible = imageResource != -1
                 if (imageSize > 0 && imageResource != -1) {
@@ -78,8 +77,6 @@ class OnboardingPageView constructor(context: Context, attrs: AttributeSet? = nu
                 binding.languageListContainer.addLanguageButton.setOnClickListener {
                     callback?.onListActionButtonClicked(this@OnboardingPageView)
                 }
-
-                binding.patrollerTasksButtonsContainer?.root?.isVisible = showPatrollerTasksButtons
             }
         }
     }

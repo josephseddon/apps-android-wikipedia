@@ -76,7 +76,6 @@ import org.wikipedia.views.MultiSelectActionModeCallback
 import org.wikipedia.views.MultiSelectActionModeCallback.Companion.isTagType
 import org.wikipedia.views.PageItemView
 import org.wikipedia.views.SwipeableItemTouchHelperCallback
-import org.wikipedia.yearinreview.YearInReviewViewModel
 import java.util.Date
 import java.util.Locale
 
@@ -237,40 +236,6 @@ class ReadingListFragment : Fragment(), MenuProvider, ReadingListItemActionsDial
                                 maybeShowCustomizeSnackbar()
                                 Prefs.isNewRecommendedReadingListGenerated = false
                                 FlowEventBus.post(NewRecommendedReadingListEvent())
-                            }
-                            is Resource.Error -> {
-                                L.e(it.throwable)
-                                binding.progressBar.isVisible = false
-                                binding.errorView.isVisible = true
-                                binding.readingListHeader.isVisible = false
-                                binding.readingListSwipeRefresh.isVisible = false
-                                binding.errorView.backClickListener = View.OnClickListener {
-                                    requireActivity().onBackPressedDispatcher.onBackPressed()
-                                }
-                                binding.errorView.setError(it.throwable)
-                            }
-                        }
-                    }
-                }
-                launch {
-                    viewModel.yirListFlow.collect {
-                        when (it) {
-                            is Resource.Loading -> {
-                                binding.progressBar.isVisible = true
-                                binding.errorView.isVisible = false
-                                binding.readingListHeader.isVisible = false
-                                binding.readingListSwipeRefresh.isVisible = false
-                            }
-                            is Resource.Success -> {
-                                readingList = it.data
-                                binding.progressBar.isVisible = false
-                                binding.errorView.isVisible = false
-                                binding.readingListHeader.isVisible = true
-                                binding.readingListSwipeRefresh.isVisible = true
-                                binding.readingListSwipeRefresh.isRefreshing = false
-                                update()
-                                YearInReviewViewModel.updateYearInReviewModel { it.copy(isReadingListCreated = true) }
-                                viewModel.saveReadingList(it.data)
                             }
                             is Resource.Error -> {
                                 L.e(it.throwable)

@@ -38,6 +38,7 @@ object OkHttpConnectionFactory {
                 .addInterceptor(OfflineCacheInterceptor())
                 .addInterceptor(TestStubInterceptor())
                 .addInterceptor(TitleEncodeInterceptor())
+                .addInterceptor(SummaryFallbackInterceptor())
                 .addInterceptor(HttpLoggingInterceptor().setLevel(Prefs.retrofitLogLevel))
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {

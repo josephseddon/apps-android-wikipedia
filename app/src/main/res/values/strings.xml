@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name_prod">Wikipedia</string>
-    <string name="app_name_beta" tools:ignore="UnusedResources">Wikipedia Beta</string>
-    <string name="app_name_alpha" tools:ignore="UnusedResources">Wikipedia Alpha</string>
+    <string name="app_name_prod">Wiktionary</string>
+    <string name="app_name_beta" tools:ignore="UnusedResources">Wiktionary Beta</string>
+    <string name="app_name_alpha" tools:ignore="UnusedResources">Wiktionary Alpha</string>
 
     <string name="wikimedia">Wikimedia</string>
 
     <string name="nav_item_back">Back</string>
     <string name="page_tabs_back">Back</string>
     <string name="nav_item_forward">Forward</string>
-    <string name="search_hint">Search Wikipedia</string>
+    <string name="search_hint">Search Wiktionary</string>
     <string name="search_hint_voice_search">Voice input search</string>
     <string name="search_hint_search_languages">Search for a language</string>
     <string name="search_back_button_content_description">Go back</string>
@@ -247,7 +247,7 @@
     <string name="page_watchlist_overflow_menu_onboarding_tooltip_text"><![CDATA[Keep track of what\'s happening to articles you are interested in. Tap the overflow menu and select <b>Add to Watchlist</b> to see changes to an article.]]></string>
     <string name="settings_item_preferences">Settings</string>
     <string name="settings_activity_title">Settings</string>
-    <string name="about_description">About the Wikipedia app</string>
+    <string name="about_description">About the Wiktionary app</string>
     <string name="privacy_policy_description">Privacy policy</string>
     <string name="terms_of_use_description">Terms of use</string>
     <string name="legal_safety_contacts_description">Legal and safety contacts</string>
@@ -270,7 +270,7 @@
     <string name="about_app_license"><![CDATA[Source code available on <a href=\"https://github.com/wikimedia/apps-android-wikipedia\">GitHub</a> under the <a href=\"https://www.apache.org/licenses/LICENSE-2.0\">Apache 2.0 License</a>. Unless otherwise specified, content is available under a <a href=\"https://creativecommons.org/licenses/by-sa/4.0\">Creative Commons Attribution-ShareAlike License</a>.]]></string>
     <string name="about_wmf"><![CDATA[A product of the <a href="https://wikimediafoundation.org/">Wikimedia Foundation</a>]]></string>
     <string name="about_activity_title">About</string>
-    <string name="about_logo_content_description">Wikipedia puzzle globe logo</string>
+    <string name="about_logo_content_description">Wiktionary logo</string>
     <string name="edit_abandon_confirm">The page has been modified. Are you sure you want to exit without saving your changes?</string>
     <string name="edit_abandon_confirm_yes">Yes</string>
     <string name="edit_abandon_confirm_no">No</string>
@@ -388,7 +388,7 @@
     <string name="format_error_server_message">Message: \"%s\"</string>
     <string name="address_copied">Address copied to clipboard.</string>
     <string name="text_copied">Text copied to clipboard.</string>
-    <string name="button_continue_to_article">Read article</string>
+    <string name="button_continue_to_article">Read definition</string>
     <string name="button_continue_to_talk_page">Open talk page</string>
     <string name="button_continue_to_disambiguation">View similar pages</string>
     <string name="link_preview_disambiguation_description">This title relates to more than one page:</string>
@@ -832,14 +832,10 @@
     <string name="view_random_card_title">Randomizer</string>
     <string name="view_random_article_card_title">Random article</string>
     <string name="view_random_article_card_action">More random articles</string>
-    <string name="view_top_read_card_title">Top read</string>
-    <string name="view_top_read_card_action">More top read</string>
     <string name="view_top_read_card_pageviews_k_suffix">%d k</string>
     <string name="view_top_read_card_pageviews_m_suffix">%d M</string>
     <string name="view_next_random_article">Load another random article</string>
     <string name="view_main_page_card_title">Today on Wikipedia</string>
-    <string name="view_main_page_card_action">View main page</string>
-    <string name="view_featured_image_card_title">Picture of the day</string>
     <string name="view_featured_image_card_download">Download</string>
     <string name="view_featured_image_card_share">Share</string>
     <string name="menu_feed_card_dismiss">Hide this card</string>
@@ -847,11 +843,9 @@
     <string name="menu_feed_card_edit_card_languages">Edit card languages</string>
     <string name="menu_feed_overflow_label">More options</string>
 
-    <string name="feed_featured_image_share_subject">Featured image from Wikimedia Commons</string>
     <string name="feed">Explore</string>
     <string name="home">Home</string>
     <string name="view_static_card_icon_content_description">Card icon</string>
-    <string name="view_card_news_title">In the news</string>
     <plurals name="view_continue_reading_card_subtitle">
         <item quantity="one">yesterday</item>
         <item quantity="other">%d days ago</item>
@@ -861,19 +855,18 @@
     <string name="view_announcement_card_negative_action">No thanks</string>
     <string name="view_offline_card_text">Content cannot be loaded when offline.</string>
     <string name="view_featured_article_card_title">Featured article</string>
+    <string name="view_word_of_the_day_card_title">Word of the day</string>
+    <string name="view_foreign_word_of_the_day_card_title">Foreign word of the day</string>
+    <string name="view_word_of_the_day_card_footer">See full entry</string>
     <string name="view_static_card_save_button_label">Save</string>
     <string name="feed_configure_activity_title">Customize the feed</string>
     <string name="feed_configure_menu_reset">Restore default view</string>
     <string name="feed_configure_menu_select_all">Show all</string>
     <string name="feed_configure_menu_deselect_all">Hide all</string>
     <string name="feed_configure_language_warning">Note that not all card types are available in all Wikipedia languages. Edit your selected languages in Settings.</string>
-    <string name="feed_item_type_news">Articles about current events</string>
-    <string name="feed_item_type_on_this_day">Events in history on this day</string>
     <string name="feed_item_type_because_you_read">Suggestions based on a recently read article from your history</string>
-    <string name="feed_item_type_featured_article">Daily featured article on Wikipedia</string>
-    <string name="feed_item_type_trending">Daily most-viewed articles</string>
-    <string name="feed_item_type_featured_image">Daily featured image from Wikimedia Commons</string>
-    <string name="feed_item_type_main_page">Main page of Wikipedia with daily featured content</string>
+    <string name="feed_item_type_word_of_the_day">Wiktionary\'s word of the day</string>
+    <string name="feed_item_type_foreign_word_of_the_day">Wiktionary\'s foreign word of the day</string>
     <string name="feed_item_type_randomizer">Generate random articles to read</string>
     <string name="feed_item_type_suggested_edits">Suggestions to add content to Wikipedia</string>
     <string name="feed_item_type_places">Nearby articles based on the current location</string>
@@ -893,8 +886,6 @@
     <string name="feed_language_variants_removal_secondary_dialog_message">You are currently using an unsupported generic Chinese language variant as a secondary language. Please go to your settings to select a new secondary language or to confirm your language list.</string>
     <string name="feed_language_variants_removal_secondary_dialog_settings">Go to Settings</string>
     <!-- /The Feed -->
-
-    <string name="top_read_activity_title">Top read on %s</string>
 
     <string name="tabs_activity_title">Tabs</string>
 
@@ -1311,9 +1302,9 @@
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_maybe_later">Maybe later</string>
     <string name="onboarding_explore_title">New ways to explore</string>
-    <string name="onboarding_explore_text"><![CDATA[Dive down the Wikipedia rabbit hole with a constantly updating Explore feed. <br/> <b>Customize</b> the feed to your interests – whether it\'s learning about historical events <b>On this day</b>, or rolling the dice with <b>Random</b>.]]></string>
+    <string name="onboarding_explore_text"><![CDATA[Dive down the Wiktionary rabbit hole with a constantly updating Explore feed. <br/> <b>Customize</b> the feed to your interests – whether it\'s learning about historical events <b>On this day</b>, or rolling the dice with <b>Random</b>.]]></string>
     <string name="onboarding_reading_list_sync_title">Reading lists with sync</string>
-    <string name="onboarding_reading_list_sync_text_v2"><![CDATA[You can make reading lists from articles you want to read later, even when you\'re offline. <br/>Login to your Wikipedia account to sync your reading lists. <a href="#login">Join Wikipedia</a>]]></string>
+    <string name="onboarding_reading_list_sync_text_v2"><![CDATA[You can make reading lists from articles you want to read later, even when you\'re offline. <br/>Login to your Wikimedia account to sync your reading lists. <a href="#login">Join Wikimedia</a>]]></string>
     <string name="onboarding_data_privacy_title">Data &amp; Privacy</string>
     <string name="onboarding_data_privacy_text"><![CDATA[We believe that you should not have to provide personal information to participate in the free knowledge movement. Usage data collected for this app is anonymous. Learn more about our <a href="#privacy">privacy policy</a> and <a href="#termsOfUse">terms of use</a>.]]></string>
     <string name="onboarding_analytics_switch_title">Send usage data</string>
@@ -1523,7 +1514,7 @@
     <string name="talk_list_item_swipe_mark_as_read">Read</string>
     <string name="talk_list_item_swipe_mark_as_unread">Unread</string>
     <string name="talk_login_to_subscribe_dialog_title">Log in to subscribe to topics</string>
-    <string name="talk_login_to_subscribe_dialog_content">Topic subscriptions will allow you to receive notifications about new comments in this topic. Please create an account or log into your Wikipedia account to subscribe to a topic.</string>
+    <string name="talk_login_to_subscribe_dialog_content">Topic subscriptions will allow you to receive notifications about new comments in this topic. Please create an account or log into your Wikimedia account to subscribe to a topic.</string>
     <string name="talk_archived_title">Talk archive: %s</string>
     <string name="menu_option_share_talk_discussion">Share discussion</string>
     <string name="menu_option_share_talk_page">Share talk page</string>
@@ -2232,7 +2223,7 @@
     <!--Recommended Reading list -->
     <string name="recommended_reading_list_title">Discover</string>
     <string name="recommended_reading_list_onboarding_card_title">Discover articles picked just for you</string>
-    <string name="recommended_reading_list_onboarding_card_message">Your weekly reading list of Wikipedia articles, curated just for you.</string>
+    <string name="recommended_reading_list_onboarding_card_message">Your weekly reading list of Wiktionary articles, curated just for you.</string>
     <string name="recommended_reading_list_onboarding_card_new">New!</string>
     <string name="recommended_reading_list_onboarding_card_positive_button">Get started</string>
     <string name="recommended_reading_list_onboarding_card_negative_button">No thanks</string>

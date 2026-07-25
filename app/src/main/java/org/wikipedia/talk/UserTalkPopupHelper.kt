@@ -15,7 +15,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
 import org.wikipedia.R
-import org.wikipedia.analytics.eventplatform.PatrollerExperienceEvent
 import org.wikipedia.auth.AccountUtil
 import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
@@ -26,8 +25,6 @@ import org.wikipedia.page.PageActivity
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.linkpreview.LinkPreviewDialog
 import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.suggestededits.SuggestedEditsRecentEditsActivity
-import org.wikipedia.suggestededits.SuggestionsActivity
 import org.wikipedia.usercontrib.UserContribListActivity
 import org.wikipedia.usercontrib.UserInformationDialog
 import org.wikipedia.util.FeedbackUtil
@@ -145,9 +142,5 @@ object UserTalkPopupHelper {
         return helper
     }
 
-    private fun sendPatrollerExperienceEvent(activity: Activity, action: String) {
-        if (activity is SuggestedEditsRecentEditsActivity || activity is SuggestionsActivity) {
-            PatrollerExperienceEvent.logAction(action, if (activity is SuggestionsActivity) "pt_edit" else "pt_recent_changes")
-        }
-    }
+    private fun sendPatrollerExperienceEvent(activity: Activity, action: String) { }
 }

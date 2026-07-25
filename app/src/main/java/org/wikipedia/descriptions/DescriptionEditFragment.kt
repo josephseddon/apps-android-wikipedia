@@ -37,7 +37,6 @@ import org.wikipedia.edit.EditTags
 import org.wikipedia.login.LoginActivity
 import org.wikipedia.notifications.AnonymousNotificationHelper
 import org.wikipedia.settings.Prefs
-import org.wikipedia.suggestededits.SuggestionsActivity
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.FeedbackUtil
 import org.wikipedia.util.ReleaseUtil
@@ -96,7 +95,6 @@ class DescriptionEditFragment : Fragment() {
             Prefs.showDescriptionEditSuccessPrompt = false
         } else {
             val intent = Intent()
-            intent.putExtra(SuggestionsActivity.EXTRA_SOURCE_ADDED_CONTRIBUTION, binding.fragmentDescriptionEditView.description)
             intent.putExtra(Constants.INTENT_EXTRA_INVOKE_SOURCE, viewModel.invokeSource)
             intent.putExtra(Constants.INTENT_EXTRA_ACTION, viewModel.action)
             requireActivity().setResult(Activity.RESULT_OK, intent)

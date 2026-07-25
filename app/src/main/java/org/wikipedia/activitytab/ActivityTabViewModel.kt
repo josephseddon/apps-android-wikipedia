@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.wikipedia.Constants
-import org.wikipedia.WikipediaApp
 import org.wikipedia.activitytab.timeline.HistoryEntryPagingSource
 import org.wikipedia.activitytab.timeline.ReadingListPagingSource
 import org.wikipedia.activitytab.timeline.TimelineItem
@@ -30,12 +29,8 @@ import org.wikipedia.auth.AccountUtil
 import org.wikipedia.categories.db.Category
 import org.wikipedia.database.AppDatabase
 import org.wikipedia.dataclient.Service
-import org.wikipedia.dataclient.ServiceFactory
 import org.wikipedia.dataclient.WikiSite
-import org.wikipedia.dataclient.growthtasks.GrowthUserImpact
 import org.wikipedia.extensions.toLocalDate
-import org.wikipedia.games.onthisday.OnThisDayGameViewModel
-import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageTitle
 import org.wikipedia.readinglist.database.ReadingListPage
 import org.wikipedia.settings.Prefs
@@ -46,7 +41,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.Date
 import java.util.concurrent.TimeUnit
-import kotlin.math.abs
 
 class ActivityTabViewModel : ViewModel() {
     private val _readingHistoryState = MutableStateFlow<UiState<ReadingHistory>>(UiState.Loading)
@@ -54,9 +48,6 @@ class ActivityTabViewModel : ViewModel() {
 
     private val _donationUiState = MutableStateFlow<UiState<String?>>(UiState.Loading)
     val donationUiState: StateFlow<UiState<String?>> = _donationUiState.asStateFlow()
-
-    private val _wikiGamesUiState = MutableStateFlow<UiState<OnThisDayGameViewModel.GameStatistics?>>(UiState.Loading)
-    val wikiGamesUiState: StateFlow<UiState<OnThisDayGameViewModel.GameStatistics?>> = _wikiGamesUiState.asStateFlow()
 
     private var currentTimelinePagingSource: TimelinePagingSource? = null
 
@@ -93,24 +84,14 @@ class ActivityTabViewModel : ViewModel() {
             }
         }
 
-    private val _impactUiState = MutableStateFlow<UiState<Pair<GrowthUserImpact, Int>>>(UiState.Loading)
-    val impactUiState: StateFlow<UiState<Pair<GrowthUserImpact, Int>>> = _impactUiState.asStateFlow()
-
-    private val _scrollToGames = MutableStateFlow(false)
-    val scrollToGames = _scrollToGames.asStateFlow()
-
     var shouldRefreshTimelineSilently: Boolean = false
 
     val allDataLoaded = combine(
         readingHistoryState,
-        donationUiState,
-        wikiGamesUiState,
-        impactUiState
-    ) { reading, donation, games, impact ->
+        donationUiState
+    ) { reading, donation ->
         reading !is UiState.Loading &&
-                donation !is UiState.Loading &&
-                games !is UiState.Loading &&
-                impact !is UiState.Loading
+                donation !is UiState.Loading
     }.stateIn(viewModelScope, SharingStarted.Lazily, false)
 
     fun loadAll() {
@@ -119,8 +100,6 @@ class ActivityTabViewModel : ViewModel() {
             return
         }
         loadDonationResults()
-        loadWikiGamesStats()
-        loadImpact()
         refreshTimeline()
     }
 
@@ -184,69 +163,6 @@ class ActivityTabViewModel : ViewModel() {
         _donationUiState.value = UiState.Success(lastDonationTime)
     }
 
-    fun loadWikiGamesStats() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            _wikiGamesUiState.value = UiState.Error(throwable)
-        }) {
-            _wikiGamesUiState.value = UiState.Loading
-            delay(500)
-            val lastGameHistory = AppDatabase.instance.dailyGameHistoryDao().findLastGameHistory()
-            if (lastGameHistory == null) {
-                _wikiGamesUiState.value = UiState.Success(null)
-                return@launch
-            }
-
-            val gamesStats =
-                OnThisDayGameViewModel.getGameStatistics(WikipediaApp.instance.wikiSite.languageCode)
-            _wikiGamesUiState.value = UiState.Success(gamesStats)
-        }
-    }
-
-    fun loadImpact() {
-        if (!AccountUtil.isLoggedIn) {
-            return
-        }
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            _impactUiState.value = UiState.Error(throwable)
-        }) {
-            _impactUiState.value = UiState.Loading
-            // The impact API is rate limited, so we cache it manually.
-            val wikiSite = WikipediaApp.instance.wikiSite
-            val now = Instant.now().epochSecond
-            val impact: GrowthUserImpact
-            val impactLastResponseBodyMap = Prefs.impactLastResponseBody.toMutableMap()
-            val impactResponse = impactLastResponseBodyMap[wikiSite.languageCode]
-            if (impactResponse.isNullOrEmpty() || abs(now - Prefs.impactLastQueryTime) > TimeUnit.HOURS.toSeconds(12)) {
-                val userId = ServiceFactory.get(wikiSite).getUserInfo().query?.userInfo?.id!!
-                impact = ServiceFactory.getCoreRest(wikiSite).getUserImpact(userId)
-                impactLastResponseBodyMap[wikiSite.languageCode] = JsonUtil.encodeToString(impact).orEmpty()
-                Prefs.impactLastResponseBody = impactLastResponseBodyMap
-                Prefs.impactLastQueryTime = now
-            } else {
-                impact = JsonUtil.decodeFromString(impactResponse)!!
-            }
-
-            val pagesResponse = ServiceFactory.get(wikiSite).getInfoByTitlesWithGlobalUserInfo(
-                titles = impact.topViewedArticles.keys.joinToString(separator = "|")
-            )
-            // Transform the response to a map of PageTitle to ArticleViews
-            val pageMap = pagesResponse.query?.pages?.associate { page ->
-                val pageTitle = PageTitle(
-                    text = page.title,
-                    wiki = wikiSite,
-                    thumbUrl = page.thumbUrl(),
-                    description = page.description,
-                    displayText = page.displayTitle(wikiSite.languageCode)
-                )
-                pageTitle to impact.topViewedArticles[pageTitle.text]!!
-            } ?: emptyMap()
-
-            impact.topViewedArticlesWithPageTitle = pageMap
-
-            _impactUiState.value = UiState.Success(Pair(impact, (pagesResponse.query?.globalUserInfo?.editCount ?: 0)))
-        }
-    }
-
     fun createPageTitleForCategory(category: Category): PageTitle {
         return PageTitle(title = category.title, wiki = WikiSite.forLanguageCode(category.lang))
     }
@@ -256,13 +172,6 @@ class ActivityTabViewModel : ViewModel() {
         val userContribPagingSource = UserContribPagingSource(wikiSiteForTimeline, AccountUtil.userName, AppDatabase.instance.historyEntryWithImageDao())
         val readingListPagingSource = ReadingListPagingSource(AppDatabase.instance.readingListPageDao())
         return listOf(historyEntryPagingSource, readingListPagingSource, userContribPagingSource)
-    }
-
-    fun getTotalEditsCount(): Int {
-        return when (val currentState = _impactUiState.value) {
-            is UiState.Success -> currentState.data.first.totalEditsCount
-            else -> 0
-        }
     }
 
     fun hasNoDonationData(): Boolean {
@@ -280,34 +189,6 @@ class ActivityTabViewModel : ViewModel() {
             }
             else -> true
         }
-    }
-
-    fun hasNoImpactData(): Boolean {
-        return when (val currentState = _impactUiState.value) {
-            is UiState.Success -> {
-                val data = currentState.data.first
-                data.totalEditsCount <= 0 && data.receivedThanksCount <= 0 && data.totalPageviewsCount <= 0
-            }
-            else -> true
-        }
-    }
-
-    fun hasNoGameStats(): Boolean {
-        return when (val currentState = _wikiGamesUiState.value) {
-            is UiState.Success -> {
-                val data = currentState.data ?: return true
-                data.totalGamesPlayed <= 0
-            }
-            else -> true
-        }
-    }
-
-    fun onScrollToGames() {
-        _scrollToGames.value = true
-    }
-
-    fun onScrollToGamesConsumed() {
-        _scrollToGames.value = false
     }
 
     class ReadingHistory(

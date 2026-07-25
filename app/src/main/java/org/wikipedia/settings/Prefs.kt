@@ -1,6 +1,5 @@
 package org.wikipedia.settings
 
-import android.location.Location
 import okhttp3.Cookie
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.logging.HttpLoggingInterceptor
@@ -14,7 +13,6 @@ import org.wikipedia.analytics.eventplatform.AppSessionEvent
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.donate.DonationResult
 import org.wikipedia.donate.donationreminder.DonationReminderConfig
-import org.wikipedia.games.onthisday.OnThisDayGameNotificationState
 import org.wikipedia.json.JsonUtil
 import org.wikipedia.page.PageTitle
 import org.wikipedia.page.action.PageActionItem
@@ -22,7 +20,6 @@ import org.wikipedia.page.tabs.Tab
 import org.wikipedia.readinglist.recommended.RecommendedReadingListSource
 import org.wikipedia.readinglist.recommended.RecommendedReadingListUpdateFrequency
 import org.wikipedia.readinglist.recommended.SourceWithOffset
-import org.wikipedia.suggestededits.SuggestedEditsRecentEditsFilterTypes
 import org.wikipedia.theme.Theme.Companion.fallback
 import org.wikipedia.util.DateUtil.dbDateFormat
 import org.wikipedia.util.DateUtil.dbDateParse
@@ -30,8 +27,6 @@ import org.wikipedia.util.ReleaseUtil.isDevRelease
 import org.wikipedia.util.StringUtil
 import org.wikipedia.watchlist.WatchlistFilterTypes
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
-import org.wikipedia.yearinreview.YearInReviewModel
-import org.wikipedia.yearinreview.YearInReviewSurveyState
 import java.util.Date
 
 /** Shared preferences utility for convenient POJO access.  */
@@ -133,21 +128,21 @@ object Prefs {
         get() = PrefsIoUtil.getInt(R.string.preference_key_editing_text_size_multiplier, 0)
         set(multiplier) = PrefsIoUtil.setInt(R.string.preference_key_editing_text_size_multiplier, multiplier)
 
-    val geoIPCountryOverride
-        get() = PrefsIoUtil.getString(R.string.preference_key_announcement_country_override, null)
-
-    val ignoreDateForAnnouncements
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_announcement_ignore_date, false)
-
-    var announcementPauseTime
-        get() = PrefsIoUtil.getLong(R.string.preference_key_announcement_pause_time, 0)
-        set(time) = PrefsIoUtil.setLong(R.string.preference_key_announcement_pause_time, time)
-
     val announcementDebugUrl
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_announcement_debug_url, false)
 
     val announcementCustomTabTestUrl
         get() = PrefsIoUtil.getString(R.string.preference_key_announcement_custom_tab_test_url, null)
+
+    var announcementPauseTime
+        get() = PrefsIoUtil.getLong(R.string.preference_key_announcement_pause_time, 0)
+        set(time) = PrefsIoUtil.setLong(R.string.preference_key_announcement_pause_time, time)
+
+    val geoIPCountryOverride
+        get() = PrefsIoUtil.getString(R.string.preference_key_announcement_country_override, null)
+
+    val ignoreDateForAnnouncements
+        get() = PrefsIoUtil.getBoolean(R.string.preference_key_announcement_ignore_date, false)
 
     val announcementsVersionCode
         get() = PrefsIoUtil.getInt(R.string.preference_key_announcement_version_code, 0)
@@ -657,18 +652,6 @@ object Prefs {
         get() = PrefsIoUtil.getInt(R.string.preference_key_event_platform_queue_size, 128)
         set(value) = PrefsIoUtil.setInt(R.string.preference_key_event_platform_queue_size, value)
 
-    var recentEditsWikiCode
-        get() = PrefsIoUtil.getString(R.string.preference_key_recent_edits_wiki_code, WikipediaApp.instance.appOrSystemLanguageCode).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_recent_edits_wiki_code, value)
-
-    var recentEditsIncludedTypeCodes
-        get() = JsonUtil.decodeFromString<Set<String>>(PrefsIoUtil.getString(R.string.preference_key_recent_edits_included_type_codes, null))
-            ?: SuggestedEditsRecentEditsFilterTypes.DEFAULT_FILTER_TYPE_SET.map { it.id }
-        set(types) = PrefsIoUtil.setString(R.string.preference_key_recent_edits_included_type_codes, JsonUtil.encodeToString(types))
-
-    var recentEditsOnboardingShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_recent_edits_onboarding_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_recent_edits_onboarding_shown, value)
 
     var showOneTimeSequentialRecentEditsDiffTooltip
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_show_sequential_recent_edits_diff_tooltip, true)
@@ -677,38 +660,6 @@ object Prefs {
     var showOneTimeRecentEditsFeedbackForm
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_show_recent_edits_feedback_form, true)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_show_recent_edits_feedback_form, value)
-
-    var placesWikiCode
-        get() = PrefsIoUtil.getString(R.string.preference_key_places_wiki_code, WikipediaApp.instance.appOrSystemLanguageCode).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_places_wiki_code, value)
-
-    var placesDefaultLocationLatLng
-        get(): String? {
-            val lanLng = PrefsIoUtil.getString(R.string.preference_key_default_places_location_latlng, null)
-            return if (lanLng.isNullOrEmpty()) null else lanLng
-        }
-        set(set) = PrefsIoUtil.setString(R.string.preference_key_default_places_location_latlng, set)
-
-    var placesLastLocationAndZoomLevel: Pair<Location, Double>?
-        get() {
-            // latitude|longitude|zoomLevel
-            val infoList = PrefsIoUtil.getString(R.string.preference_key_places_last_location_and_zoom_level, null)?.split("|")?.map { it.toDouble() }
-            return infoList?.let {
-                val location = Location("").apply {
-                    latitude = infoList[0]
-                    longitude = infoList[1]
-                }
-                val zoomLevel = infoList[2]
-                Pair(location, zoomLevel)
-            }
-        }
-        set(pair) {
-            var locationAndZoomLevelString: String? = null
-            pair?.let {
-                locationAndZoomLevelString = "${pair.first.latitude}|${pair.first.longitude}|${pair.second}"
-            }
-            PrefsIoUtil.setString(R.string.preference_key_places_last_location_and_zoom_level, locationAndZoomLevelString)
-        }
 
     var recentUsedTemplates
         get() = JsonUtil.decodeFromString<Set<PageTitle>>(PrefsIoUtil.getString(R.string.preference_key_recent_used_templates, null)) ?: emptySet()
@@ -740,58 +691,6 @@ object Prefs {
     var donationResults
         get() = JsonUtil.decodeFromString<List<DonationResult>>(PrefsIoUtil.getString(R.string.preference_key_donation_results, null)).orEmpty()
         set(value) = PrefsIoUtil.setString(R.string.preference_key_donation_results, JsonUtil.encodeToString(value))
-
-    var lastOtdGameDateOverride
-        get() = PrefsIoUtil.getString(R.string.preference_key_otd_game_date_override, null).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_game_date_override, value)
-
-    var otdGameState
-        get() = PrefsIoUtil.getString(R.string.preference_key_otd_game_state, null).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_game_state, value)
-
-    var otdGameHistory
-        get() = PrefsIoUtil.getString(R.string.preference_key_otd_game_history, null).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_game_history, value)
-
-    var otdLastPlayedDate
-        get() = PrefsIoUtil.getString(R.string.preference_key_otd_last_played_date, null).orEmpty()
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_last_played_date, value)
-
-    var otdGameQuestionsPerDay
-        get() = PrefsIoUtil.getInt(R.string.preference_key_otd_game_num_questions, 5)
-        set(value) = PrefsIoUtil.setInt(R.string.preference_key_otd_game_num_questions, value)
-
-    var otdEntryDialogShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_otd_entry_dialog_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_otd_entry_dialog_shown, value)
-
-    var otdGameFirstPlayedShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_otd_game_first_played_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_otd_game_first_played_shown, value)
-
-    var otdNotificationState: OnThisDayGameNotificationState
-        get() = PrefsIoUtil.getString(R.string.preference_key_otd_notification_state, null)?.let {
-            OnThisDayGameNotificationState.valueOf(it)
-        } ?: OnThisDayGameNotificationState.NO_INTERACTED
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_otd_notification_state, value.name)
-
-    var isOtdSoundOn
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_otd_sound_on, true)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_otd_sound_on, value)
-
-    var isYearInReviewEnabled: Boolean
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_year_in_review_is_enabled, true)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_year_in_review_is_enabled, value)
-
-    var yearInReviewVisited: Boolean
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_year_in_review_visited, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_year_in_review_visited, value)
-
-    var yearInReviewSurveyState: YearInReviewSurveyState
-        get() = PrefsIoUtil.getString(R.string.preference_key_yir_survey_state, null)?.let {
-            YearInReviewSurveyState.valueOf(it)
-        } ?: YearInReviewSurveyState.NOT_TRIGGERED
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_yir_survey_state, value.name)
 
     var isRecommendedReadingListEnabled
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_recommended_reading_list_enabled, false)
@@ -861,15 +760,6 @@ object Prefs {
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_activity_tab_onboarding_shown, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_activity_tab_onboarding_shown, value)
 
-    var yearInReviewModelData
-        get() = JsonUtil.decodeFromString<Map<Int, YearInReviewModel>>(PrefsIoUtil.getString(R.string.preference_key_yir_model_data, null))
-            ?: emptyMap()
-        set(modelDataWithYear) = PrefsIoUtil.setString(R.string.preference_key_yir_model_data, JsonUtil.encodeToString(modelDataWithYear))
-
-    var selectedAppIcon
-        get() = PrefsIoUtil.getString(R.string.preference_key_selected_app_icon, LauncherIcon.DEFAULT.key)
-        set(value) = PrefsIoUtil.setString(R.string.preference_key_selected_app_icon, value)
-
     var isHybridSearchOnboardingShown
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_hybrid_search_onboarding_shown, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_hybrid_search_onboarding_shown, value)
@@ -877,10 +767,6 @@ object Prefs {
     var isHybridSearchEnabled
         get() = PrefsIoUtil.getBoolean(R.string.preference_key_hybrid_search_enabled, false)
         set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_hybrid_search_enabled, value)
-
-    var isGameStatsUnavailableSnackbarShown
-        get() = PrefsIoUtil.getBoolean(R.string.preference_key_game_stats_snackbar_shown, false)
-        set(value) = PrefsIoUtil.setBoolean(R.string.preference_key_game_stats_snackbar_shown, value)
 
     var readingChallengeStreak
         get() = PrefsIoUtil.getInt(R.string.preference_key_reading_challenge_streak, 0)

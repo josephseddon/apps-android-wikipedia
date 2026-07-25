@@ -3,17 +3,12 @@ package org.wikipedia.feed
 import androidx.annotation.StringRes
 import kotlinx.coroutines.CoroutineScope
 import org.wikipedia.R
-import org.wikipedia.WikipediaApp
-import org.wikipedia.auth.AccountUtil
 import org.wikipedia.feed.accessibility.AccessibilityCardClient
-import org.wikipedia.feed.aggregated.AggregatedFeedContentClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
-import org.wikipedia.feed.mainpage.MainPageClient
-import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.random.RandomClient
-import org.wikipedia.feed.suggestededits.SuggestedEditsFeedClient
-import org.wikipedia.feed.wikigames.WikiGamesCardClient
+import org.wikipedia.feed.wotd.ForeignWordOfTheDayClient
+import org.wikipedia.feed.wotd.WordOfTheDayClient
 import org.wikipedia.model.EnumCode
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
@@ -23,63 +18,28 @@ enum class FeedContentType(private val code: Int,
                            @StringRes val subtitleId: Int,
                            val isPerLanguage: Boolean,
                            var showInConfig: Boolean = true) : EnumCode {
-    FEATURED_ARTICLE(6, R.string.view_featured_article_card_title, R.string.feed_item_type_featured_article, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) AggregatedFeedContentClient.FeaturedArticle(coroutineScope, aggregatedClient) else null
+    WORD_OF_THE_DAY(11, R.string.view_word_of_the_day_card_title, R.string.feed_item_type_word_of_the_day, true) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) WordOfTheDayClient(coroutineScope) else null
         }
     },
-    WIKI_GAMES(12, R.string.wikipedia_games_title, R.string.wikipedia_games_subtitle, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled && age == 0 && WikipediaApp.instance.isOnline) WikiGamesCardClient(coroutineScope) else null
-        }
-    },
-    TOP_READ_ARTICLES(3, R.string.view_top_read_card_title, R.string.feed_item_type_trending, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) AggregatedFeedContentClient.TopReadArticles(coroutineScope, aggregatedClient) else null
-        }
-    },
-    PLACES(11, R.string.places_title, R.string.feed_item_type_places, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) PlacesFeedClient(coroutineScope) else null
-        }
-    },
-    FEATURED_IMAGE(7, R.string.view_featured_image_card_title, R.string.feed_item_type_featured_image, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) AggregatedFeedContentClient.FeaturedImage(coroutineScope, aggregatedClient) else null
+    FOREIGN_WORD_OF_THE_DAY(12, R.string.view_foreign_word_of_the_day_card_title, R.string.feed_item_type_foreign_word_of_the_day, true) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) ForeignWordOfTheDayClient(coroutineScope) else null
         }
     },
     BECAUSE_YOU_READ(8, R.string.view_because_you_read_card_title, R.string.feed_item_type_because_you_read, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) BecauseYouReadClient(coroutineScope) else null
         }
     },
-    NEWS(0, R.string.view_card_news_title, R.string.feed_item_type_news, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled && age == 0) AggregatedFeedContentClient.InTheNews(coroutineScope, aggregatedClient) else null
-        }
-    },
-    ON_THIS_DAY(1, R.string.on_this_day_card_title, R.string.feed_item_type_on_this_day, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) AggregatedFeedContentClient.OnThisDayFeed(coroutineScope, aggregatedClient) else null
-        }
-    },
     RANDOM(5, R.string.view_random_card_title, R.string.feed_item_type_randomizer, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) RandomClient(coroutineScope) else null
         }
     },
-    MAIN_PAGE(4, R.string.view_main_page_card_title, R.string.feed_item_type_main_page, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled && age == 0) MainPageClient() else null
-        }
-    },
-    SUGGESTED_EDITS(9, R.string.suggested_edits_feed_card_title, R.string.feed_item_type_suggested_edits, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled && AccountUtil.isLoggedIn && WikipediaApp.instance.isOnline) SuggestedEditsFeedClient(coroutineScope) else null
-        }
-    },
     ACCESSIBILITY(10, 0, 0, false, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (DeviceUtil.isAccessibilityEnabled) AccessibilityCardClient() else null
         }
     };
@@ -89,7 +49,7 @@ enum class FeedContentType(private val code: Int,
     val langCodesSupported = mutableListOf<String>()
     val langCodesDisabled = mutableListOf<String>()
 
-    abstract fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient?
+    abstract fun newClient(coroutineScope: CoroutineScope): FeedClient?
 
     override fun code(): Int {
         return code
@@ -119,9 +79,15 @@ enum class FeedContentType(private val code: Int,
             val orderList = Prefs.feedCardsOrder
             val langSupportedMap = Prefs.feedCardsLangSupported
             val langDisabledMap = Prefs.feedCardsLangDisabled
+            // If the set of content types has changed since these were saved (e.g. cards were
+            // added or removed), the saved lists no longer line up positionally with `entries` --
+            // reusing them by index would silently reassign one card's saved order/enabled state
+            // to a completely different card. Fall back to defaults instead of doing that.
+            val useSavedOrder = orderList.size == entries.size
+            val useSavedEnabled = enabledList.size == entries.size
             entries.forEachIndexed { i, type ->
-                type.isEnabled = enabledList.getOrElse(i) { true }
-                type.order = orderList.getOrElse(i) { i }
+                type.isEnabled = if (useSavedEnabled) enabledList[i] else true
+                type.order = if (useSavedOrder) orderList[i] else i
                 type.langCodesSupported.clear()
                 langSupportedMap[type.code]?.let {
                     type.langCodesSupported.addAll(it)
@@ -130,6 +96,9 @@ enum class FeedContentType(private val code: Int,
                 langDisabledMap[type.code]?.let {
                     type.langCodesDisabled.addAll(it)
                 }
+            }
+            if (!useSavedOrder || !useSavedEnabled) {
+                saveState()
             }
         }
     }

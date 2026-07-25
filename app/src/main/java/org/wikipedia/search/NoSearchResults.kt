@@ -16,7 +16,6 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -29,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.wikipedia.Constants
 import org.wikipedia.R
-import org.wikipedia.analytics.eventplatform.PlacesEvent
 import org.wikipedia.compose.theme.BaseTheme
 import org.wikipedia.compose.theme.WikipediaTheme
 import org.wikipedia.language.LanguageUtil
@@ -42,12 +40,6 @@ fun NoSearchResults(
     invokeSource: Constants.InvokeSource,
     modifier: Modifier = Modifier
 ) {
-    if (countsPerLanguageCode.isNotEmpty() && invokeSource == Constants.InvokeSource.PLACES) {
-        LaunchedEffect(Unit) {
-            PlacesEvent.logAction("no_results_impression", "search_view")
-        }
-    }
-
     if (countsPerLanguageCode.isNotEmpty()) {
         LazyColumn(
             modifier = modifier
