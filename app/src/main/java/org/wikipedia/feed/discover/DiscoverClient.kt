@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.dataclient.FeedClient
+import org.wikipedia.feed.wikivoyage.WikivoyageArchiveRepository
 import org.wikipedia.feed.wikivoyage.WikivoyageMainPageRepository
 import org.wikipedia.util.log.L
 
@@ -24,7 +25,11 @@ class DiscoverClient(
                 cb.error(caught)
             }
         ) {
-            val discover = WikivoyageMainPageRepository.getMainPageData(wiki).discover
+            val discover = if (age == 0) {
+                WikivoyageMainPageRepository.getMainPageData(wiki).discover
+            } else {
+                WikivoyageArchiveRepository.getDiscoverForMonthsAgo(wiki, age)
+            }
             cb.success(discover?.let { listOf(DiscoverCard(it, age, wiki)) }.orEmpty())
         }
     }

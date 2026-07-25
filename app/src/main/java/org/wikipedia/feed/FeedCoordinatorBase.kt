@@ -20,7 +20,6 @@ import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.progress.ProgressCard
 import org.wikipedia.feed.random.RandomCard
 import org.wikipedia.settings.Prefs
-import org.wikipedia.util.DateUtil
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.ThrowableUtil
 import org.wikipedia.util.log.L
@@ -226,7 +225,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         val progressPos = cards.indexOf(progressCard)
         var pos = if (progressPos >= 0) progressPos else cards.size
         if (isMonthlyCardType(card)) {
-            val monthKey = DateUtil.getDefaultDateFor(age).let { it.get(Calendar.YEAR) * 12 + it.get(Calendar.MONTH) }
+            val monthKey = Calendar.getInstance().apply { add(Calendar.MONTH, -age) }
+                .let { it.get(Calendar.YEAR) * 12 + it.get(Calendar.MONTH) }
             if (monthKey != currentMonthCardKey) {
                 currentMonthCardKey = monthKey
                 monthlyCardTypesShownThisMonth.clear()

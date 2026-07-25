@@ -20,7 +20,7 @@ abstract class FeaturedArticleCard(
     }
 
     override fun subtitle(): String {
-        return DateUtil.getFeedCardDateString(age)
+        return DateUtil.getFeedCardMonthString(age)
     }
 
     override fun image(): Uri? {

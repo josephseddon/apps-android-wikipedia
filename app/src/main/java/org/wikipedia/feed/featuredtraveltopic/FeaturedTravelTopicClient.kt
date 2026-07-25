@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.dataclient.FeedClient
+import org.wikipedia.feed.wikivoyage.WikivoyageArchiveRepository
 import org.wikipedia.feed.wikivoyage.WikivoyageMainPageRepository
 import org.wikipedia.feed.wikivoyage.WikivoyageSpotlightType
 import org.wikipedia.util.log.L
@@ -25,8 +26,11 @@ class FeaturedTravelTopicClient(
                 cb.error(caught)
             }
         ) {
-            val spotlight = WikivoyageMainPageRepository.getMainPageData(wiki)
-                .spotlights[WikivoyageSpotlightType.FEATURED_TRAVEL_TOPIC]
+            val spotlight = if (age == 0) {
+                WikivoyageMainPageRepository.getMainPageData(wiki).spotlights[WikivoyageSpotlightType.FEATURED_TRAVEL_TOPIC]
+            } else {
+                WikivoyageArchiveRepository.getSpotlightForMonthsAgo(wiki, WikivoyageSpotlightType.FEATURED_TRAVEL_TOPIC, age)
+            }
             cb.success(spotlight?.let { listOf(FeaturedTravelTopicCard(it, age, wiki)) }.orEmpty())
         }
     }

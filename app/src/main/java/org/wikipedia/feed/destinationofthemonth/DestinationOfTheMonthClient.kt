@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.dataclient.FeedClient
+import org.wikipedia.feed.wikivoyage.WikivoyageArchiveRepository
 import org.wikipedia.feed.wikivoyage.WikivoyageMainPageRepository
 import org.wikipedia.feed.wikivoyage.WikivoyageSpotlightType
 import org.wikipedia.util.log.L
@@ -25,8 +26,11 @@ class DestinationOfTheMonthClient(
                 cb.error(caught)
             }
         ) {
-            val spotlight = WikivoyageMainPageRepository.getMainPageData(wiki)
-                .spotlights[WikivoyageSpotlightType.DESTINATION_OF_THE_MONTH]
+            val spotlight = if (age == 0) {
+                WikivoyageMainPageRepository.getMainPageData(wiki).spotlights[WikivoyageSpotlightType.DESTINATION_OF_THE_MONTH]
+            } else {
+                WikivoyageArchiveRepository.getSpotlightForMonthsAgo(wiki, WikivoyageSpotlightType.DESTINATION_OF_THE_MONTH, age)
+            }
             cb.success(spotlight?.let { listOf(DestinationOfTheMonthCard(it, age, wiki)) }.orEmpty())
         }
     }

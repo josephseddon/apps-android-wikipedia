@@ -54,8 +54,11 @@ object DateUtil {
         return getShortDateString(UtcDate(age).baseCalendar.time)
     }
 
+    // Unlike getFeedCardDateString(age), the feed cards this backs (Wikivoyage's monthly-cadence
+    // spotlight cards) treat `age` as "months ago" rather than "days ago".
     fun getFeedCardMonthString(age: Int): String {
-        return getDateStringWithSkeletonPattern(getDefaultDateFor(age).time, "MMMM")
+        val calendar = Calendar.getInstance().apply { add(Calendar.MONTH, -age) }
+        return getDateStringWithSkeletonPattern(calendar.time, "MMMM")
     }
 
     fun getFeedCardShortDateString(date: Calendar): String {
