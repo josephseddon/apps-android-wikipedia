@@ -832,8 +832,6 @@
     <string name="view_random_card_title">Randomizer</string>
     <string name="view_random_article_card_title">Random article</string>
     <string name="view_random_article_card_action">More random articles</string>
-    <string name="view_top_read_card_title">Top read</string>
-    <string name="view_top_read_card_action">More top read</string>
     <string name="view_top_read_card_pageviews_k_suffix">%d k</string>
     <string name="view_top_read_card_pageviews_m_suffix">%d M</string>
     <string name="view_next_random_article">Load another random article</string>
@@ -869,7 +867,6 @@
     <string name="feed_item_type_because_you_read">Suggestions based on a recently read article from your history</string>
     <string name="feed_item_type_word_of_the_day">Wiktionary\'s word of the day</string>
     <string name="feed_item_type_foreign_word_of_the_day">Wiktionary\'s foreign word of the day</string>
-    <string name="feed_item_type_trending">Daily most-viewed articles</string>
     <string name="feed_item_type_randomizer">Generate random articles to read</string>
     <string name="feed_item_type_suggested_edits">Suggestions to add content to Wikipedia</string>
     <string name="feed_item_type_places">Nearby articles based on the current location</string>
@@ -889,8 +886,6 @@
     <string name="feed_language_variants_removal_secondary_dialog_message">You are currently using an unsupported generic Chinese language variant as a secondary language. Please go to your settings to select a new secondary language or to confirm your language list.</string>
     <string name="feed_language_variants_removal_secondary_dialog_settings">Go to Settings</string>
     <!-- /The Feed -->
-
-    <string name="top_read_activity_title">Top read on %s</string>
 
     <string name="tabs_activity_title">Tabs</string>
 

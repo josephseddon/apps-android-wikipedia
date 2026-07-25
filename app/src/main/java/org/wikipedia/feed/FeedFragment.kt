@@ -23,8 +23,6 @@ import org.wikipedia.feed.configure.LanguageItemAdapter
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.WikiSiteCard
 import org.wikipedia.feed.random.RandomCardView
-import org.wikipedia.feed.topread.TopReadArticlesActivity
-import org.wikipedia.feed.topread.TopReadListCard
 import org.wikipedia.feed.view.FeedAdapter
 import org.wikipedia.feed.view.RegionalLanguageVariantSelectionDialog
 import org.wikipedia.history.HistoryEntry
@@ -258,12 +256,7 @@ class FeedFragment : Fragment() {
             }
         }
 
-        override fun onFooterClick(card: Card) {
-            if (card is TopReadListCard) {
-                startActivity(TopReadArticlesActivity.newIntent(requireContext(), card))
-            }
-        }
-
+        override fun onFooterClick(card: Card) {}
     }
 
     private inner class FeedScrollListener : RecyclerView.OnScrollListener() {

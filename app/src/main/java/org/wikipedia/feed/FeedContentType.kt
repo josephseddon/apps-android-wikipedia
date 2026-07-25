@@ -3,9 +3,7 @@ package org.wikipedia.feed
 import androidx.annotation.StringRes
 import kotlinx.coroutines.CoroutineScope
 import org.wikipedia.R
-import org.wikipedia.WikipediaApp
 import org.wikipedia.feed.accessibility.AccessibilityCardClient
-import org.wikipedia.feed.aggregated.AggregatedFeedContentClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.random.RandomClient
@@ -20,34 +18,29 @@ enum class FeedContentType(private val code: Int,
                            @StringRes val subtitleId: Int,
                            val isPerLanguage: Boolean,
                            var showInConfig: Boolean = true) : EnumCode {
-    TOP_READ_ARTICLES(3, R.string.view_top_read_card_title, R.string.feed_item_type_trending, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) AggregatedFeedContentClient.TopReadArticles(coroutineScope, aggregatedClient) else null
-        }
-    },
-    BECAUSE_YOU_READ(8, R.string.view_because_you_read_card_title, R.string.feed_item_type_because_you_read, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) BecauseYouReadClient(coroutineScope) else null
-        }
-    },
-    RANDOM(5, R.string.view_random_card_title, R.string.feed_item_type_randomizer, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (isEnabled) RandomClient(coroutineScope) else null
-        }
-    },
-    ACCESSIBILITY(10, 0, 0, false, false) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
-            return if (DeviceUtil.isAccessibilityEnabled) AccessibilityCardClient() else null
-        }
-    },
     WORD_OF_THE_DAY(11, R.string.view_word_of_the_day_card_title, R.string.feed_item_type_word_of_the_day, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) WordOfTheDayClient(coroutineScope) else null
         }
     },
     FOREIGN_WORD_OF_THE_DAY(12, R.string.view_foreign_word_of_the_day_card_title, R.string.feed_item_type_foreign_word_of_the_day, true) {
-        override fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient? {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) ForeignWordOfTheDayClient(coroutineScope) else null
+        }
+    },
+    BECAUSE_YOU_READ(8, R.string.view_because_you_read_card_title, R.string.feed_item_type_because_you_read, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) BecauseYouReadClient(coroutineScope) else null
+        }
+    },
+    RANDOM(5, R.string.view_random_card_title, R.string.feed_item_type_randomizer, true) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) RandomClient(coroutineScope) else null
+        }
+    },
+    ACCESSIBILITY(10, 0, 0, false, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (DeviceUtil.isAccessibilityEnabled) AccessibilityCardClient() else null
         }
     };
 
@@ -56,7 +49,7 @@ enum class FeedContentType(private val code: Int,
     val langCodesSupported = mutableListOf<String>()
     val langCodesDisabled = mutableListOf<String>()
 
-    abstract fun newClient(coroutineScope: CoroutineScope, aggregatedClient: AggregatedFeedContentClient, age: Int): FeedClient?
+    abstract fun newClient(coroutineScope: CoroutineScope): FeedClient?
 
     override fun code(): Int {
         return code
@@ -86,9 +79,15 @@ enum class FeedContentType(private val code: Int,
             val orderList = Prefs.feedCardsOrder
             val langSupportedMap = Prefs.feedCardsLangSupported
             val langDisabledMap = Prefs.feedCardsLangDisabled
+            // If the set of content types has changed since these were saved (e.g. cards were
+            // added or removed), the saved lists no longer line up positionally with `entries` --
+            // reusing them by index would silently reassign one card's saved order/enabled state
+            // to a completely different card. Fall back to defaults instead of doing that.
+            val useSavedOrder = orderList.size == entries.size
+            val useSavedEnabled = enabledList.size == entries.size
             entries.forEachIndexed { i, type ->
-                type.isEnabled = enabledList.getOrElse(i) { true }
-                type.order = orderList.getOrElse(i) { i }
+                type.isEnabled = if (useSavedEnabled) enabledList[i] else true
+                type.order = if (useSavedOrder) orderList[i] else i
                 type.langCodesSupported.clear()
                 langSupportedMap[type.code]?.let {
                     type.langCodesSupported.addAll(it)
@@ -97,6 +96,9 @@ enum class FeedContentType(private val code: Int,
                 langDisabledMap[type.code]?.let {
                     type.langCodesDisabled.addAll(it)
                 }
+            }
+            if (!useSavedOrder || !useSavedEnabled) {
+                saveState()
             }
         }
     }

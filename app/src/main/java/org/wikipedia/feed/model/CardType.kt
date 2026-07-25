@@ -11,7 +11,6 @@ import org.wikipedia.feed.offline.OfflineCardView
 import org.wikipedia.feed.progress.ProgressCardView
 import org.wikipedia.feed.random.RandomCardView
 import org.wikipedia.feed.searchbar.SearchCardView
-import org.wikipedia.feed.topread.TopReadCardView
 import org.wikipedia.feed.view.FeedCardView
 import org.wikipedia.feed.wotd.ForeignWordOfTheDayCardView
 import org.wikipedia.feed.wotd.WordOfTheDayCardView
@@ -31,17 +30,12 @@ enum class CardType(
             return BecauseYouReadCardView(ctx)
         }
     },
-    TOP_READ_LIST(3, FeedContentType.TOP_READ_ARTICLES) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return TopReadCardView(ctx)
-        }
-    },
     RANDOM(5, FeedContentType.RANDOM) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return RandomCardView(ctx)
         }
     },
-    BECAUSE_YOU_READ_ITEM(9), MOST_READ_ITEM(10), ANNOUNCEMENT(13) {
+    BECAUSE_YOU_READ_ITEM(9), ANNOUNCEMENT(13) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AnnouncementCardView(ctx)
         }

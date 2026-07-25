@@ -218,10 +218,6 @@
         <activity
             android:name=".onboarding.InitialOnboardingActivity"/>
 
-        <activity
-            android:name=".feed.topread.TopReadArticlesActivity"
-            android:theme="@style/AppTheme.ActionBar"/>
-
         <activity android:name=".feed.configure.ConfigureActivity"
             android:label="@string/feed_configure_activity_title"/>
 

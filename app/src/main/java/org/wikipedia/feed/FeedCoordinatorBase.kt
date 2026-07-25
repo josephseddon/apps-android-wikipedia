@@ -12,7 +12,6 @@ import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.CardType
 import org.wikipedia.feed.offline.OfflineCard
 import org.wikipedia.feed.progress.ProgressCard
-import org.wikipedia.feed.topread.TopReadListCard
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.ThrowableUtil
@@ -245,7 +244,7 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     }
 
     private fun isDailyCardType(card: Card): Boolean {
-        return card is TopReadListCard || card is FeaturedArticleCard
+        return card is FeaturedArticleCard
     }
 
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {
