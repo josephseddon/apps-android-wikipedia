@@ -72,7 +72,7 @@ class PageRobot(private val context: Context) : BaseRobot() {
     }
 
     fun visitImagePage() = apply {
-        click.onDisplayedViewWithText(viewId = R.id.title, text = "Go to image page")
+        click.onDisplayedViewWithText(viewId = android.R.id.title, text = "Go to image page")
         delay(TestConfig.DELAY_SHORT)
     }
 
@@ -377,7 +377,7 @@ class PageRobot(private val context: Context) : BaseRobot() {
     }
 
     fun clickEditIntroductionMenuItem() = apply {
-        click.onDisplayedViewWithText(viewId = R.id.title, text = "Edit introduction")
+        click.onDisplayedViewWithText(viewId = android.R.id.title, text = "Edit introduction")
         delay(TestConfig.DELAY_LARGE)
     }
 }

@@ -7,20 +7,17 @@ import org.wikipedia.feed.accessibility.AccessibilityCardView
 import org.wikipedia.feed.announcement.AnnouncementCardView
 import org.wikipedia.feed.becauseyouread.BecauseYouReadCardView
 import org.wikipedia.feed.dayheader.DayHeaderCardView
-import org.wikipedia.feed.featured.FeaturedArticleCardView
-import org.wikipedia.feed.image.FeaturedImageCardView
-import org.wikipedia.feed.mainpage.MainPageCardView
-import org.wikipedia.feed.news.NewsCardView
+import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCardView
+import org.wikipedia.feed.discover.DiscoverCardView
+import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicCardView
+import org.wikipedia.feed.monthheader.MonthHeaderCardView
 import org.wikipedia.feed.offline.OfflineCardView
-import org.wikipedia.feed.onthisday.OnThisDayCardView
+import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathCardView
 import org.wikipedia.feed.places.PlacesCardView
 import org.wikipedia.feed.progress.ProgressCardView
 import org.wikipedia.feed.random.RandomCardView
 import org.wikipedia.feed.searchbar.SearchCardView
-import org.wikipedia.feed.suggestededits.SuggestedEditsCardView
-import org.wikipedia.feed.topread.TopReadCardView
 import org.wikipedia.feed.view.FeedCardView
-import org.wikipedia.feed.wikigames.WikiGamesCardView
 import org.wikipedia.model.EnumCode
 
 enum class CardType(
@@ -37,37 +34,12 @@ enum class CardType(
             return BecauseYouReadCardView(ctx)
         }
     },
-    TOP_READ_LIST(3, FeedContentType.TOP_READ_ARTICLES) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return TopReadCardView(ctx)
-        }
-    },
-    FEATURED_ARTICLE(4, FeedContentType.FEATURED_ARTICLE) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return FeaturedArticleCardView(ctx)
-        }
-    },
     RANDOM(5, FeedContentType.RANDOM) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return RandomCardView(ctx)
         }
     },
-    MAIN_PAGE(6, FeedContentType.MAIN_PAGE) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return MainPageCardView(ctx)
-        }
-    },
-    NEWS_LIST(7, FeedContentType.NEWS) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return NewsCardView(ctx)
-        }
-    },
-    FEATURED_IMAGE(8, FeedContentType.FEATURED_IMAGE) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return FeaturedImageCardView(ctx)
-        }
-    },
-    BECAUSE_YOU_READ_ITEM(9), MOST_READ_ITEM(10), NEWS_ITEM(11), NEWS_ITEM_LINK(12), ANNOUNCEMENT(13) {
+    BECAUSE_YOU_READ_ITEM(9), ANNOUNCEMENT(13) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AnnouncementCardView(ctx)
         }
@@ -87,19 +59,9 @@ enum class CardType(
             return AnnouncementCardView(ctx)
         }
     },
-    ON_THIS_DAY(18, FeedContentType.ON_THIS_DAY) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return OnThisDayCardView(ctx)
-        }
-    },
     ONBOARDING_CUSTOMIZE_FEED(19) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return AnnouncementCardView(ctx)
-        }
-    },
-    SUGGESTED_EDITS(21, FeedContentType.SUGGESTED_EDITS) {
-        override fun newView(ctx: Context): FeedCardView<*> {
-            return SuggestedEditsCardView(ctx)
         }
     },
     ACCESSIBILITY(22, FeedContentType.ACCESSIBILITY) {
@@ -112,9 +74,29 @@ enum class CardType(
             return PlacesCardView(ctx)
         }
     },
-    WIKI_GAMES(24, FeedContentType.WIKI_GAMES) {
+    DESTINATION_OF_THE_MONTH(24, FeedContentType.DESTINATION_OF_THE_MONTH) {
         override fun newView(ctx: Context): FeedCardView<*> {
-            return WikiGamesCardView(ctx)
+            return DestinationOfTheMonthCardView(ctx)
+        }
+    },
+    OFF_THE_BEATEN_PATH(25, FeedContentType.OFF_THE_BEATEN_PATH) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return OffTheBeatenPathCardView(ctx)
+        }
+    },
+    FEATURED_TRAVEL_TOPIC(26, FeedContentType.FEATURED_TRAVEL_TOPIC) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return FeaturedTravelTopicCardView(ctx)
+        }
+    },
+    DISCOVER(27, FeedContentType.DISCOVER) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return DiscoverCardView(ctx)
+        }
+    },
+    MONTH_HEADER(96) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return MonthHeaderCardView(ctx)
         }
     },
     DAY_HEADER(97) {

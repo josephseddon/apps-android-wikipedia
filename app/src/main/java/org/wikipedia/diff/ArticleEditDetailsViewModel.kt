@@ -22,7 +22,6 @@ import org.wikipedia.edit.Edit
 import org.wikipedia.edit.EditTags
 import org.wikipedia.page.Namespace
 import org.wikipedia.page.PageTitle
-import org.wikipedia.suggestededits.provider.EditingSuggestionsProvider
 import org.wikipedia.util.Resource
 import org.wikipedia.util.SingleLiveData
 import org.wikipedia.watchlist.WatchlistExpiry
@@ -59,11 +58,7 @@ class ArticleEditDetailsViewModel(savedStateHandle: SavedStateHandle) : ViewMode
     val diffSize get() = if (revisionFrom != null) revisionTo!!.size - revisionFrom!!.size else revisionTo!!.size
 
     init {
-        if (!fromRecentEdits) {
-            getRevisionDetails(revisionToId, revisionFromId)
-        } else {
-            getNextRecentEdit()
-        }
+        getRevisionDetails(revisionToId, revisionFromId)
     }
 
     fun getRevisionDetails(revisionIdTo: Long, revisionIdFrom: Long = -1) {
@@ -101,37 +96,6 @@ class ArticleEditDetailsViewModel(savedStateHandle: SavedStateHandle) : ViewMode
                 canGoForward = revisions[0].revId < page.lastrevid
                 revisionFrom = revisions.getOrNull(1)
             }
-
-            revisionToId = revisionTo!!.revId
-            revisionFromId = if (revisionFrom != null) revisionFrom!!.revId else revisionTo!!.parentRevId
-
-            revisionDetails.postValue(Resource.Success(Unit))
-            getDiffText(revisionFromId, revisionToId)
-        }
-    }
-
-    private fun getNextRecentEdit() {
-        viewModelScope.launch(CoroutineExceptionHandler { _, throwable ->
-            revisionDetails.postValue(Resource.Error(throwable))
-        }) {
-            val candidate = EditingSuggestionsProvider.getNextRevertCandidate(pageTitle.wikiSite.languageCode)
-            pageId = candidate.pageid
-            revisionToId = candidate.curRev
-
-            val response = ServiceFactory.get(pageTitle.wikiSite).getRevisionDetailsWithUserInfo(pageId.toString(), 2, revisionToId)
-            val page = response.query?.firstPage()!!
-            val revisions = page.revisions
-
-            pageTitle = PageTitle(page.title, pageTitle.wikiSite)
-            pageTitle.displayText = page.displayTitle(pageTitle.wikiSite.languageCode)
-
-            watchedStatus.postValue(Resource.Success(page))
-            hasRollbackRights = response.query?.userInfo?.rights?.contains("rollback") == true
-            rollbackRights.postValue(Resource.Success(hasRollbackRights))
-
-            revisionTo = revisions[0]
-            canGoForward = revisions[0].revId < page.lastrevid
-            revisionFrom = revisions.getOrNull(1)
 
             revisionToId = revisionTo!!.revId
             revisionFromId = if (revisionFrom != null) revisionFrom!!.revId else revisionTo!!.parentRevId

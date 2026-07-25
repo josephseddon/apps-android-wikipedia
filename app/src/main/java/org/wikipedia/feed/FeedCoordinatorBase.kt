@@ -4,24 +4,26 @@ import android.content.Context
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.accessibility.AccessibilityCard
 import org.wikipedia.feed.announcement.AnnouncementClient
+import org.wikipedia.feed.becauseyouread.BecauseYouReadCard
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
-import org.wikipedia.feed.dayheader.DayHeaderCard
-import org.wikipedia.feed.featured.FeaturedArticleCard
-import org.wikipedia.feed.image.FeaturedImageCard
+import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCard
+import org.wikipedia.feed.discover.DiscoverCard
+import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicCard
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.CardType
-import org.wikipedia.feed.news.NewsCard
+import org.wikipedia.feed.monthheader.MonthHeaderCard
 import org.wikipedia.feed.offline.OfflineCard
-import org.wikipedia.feed.onthisday.OnThisDayCard
+import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathCard
+import org.wikipedia.feed.places.PlacesCard
 import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.progress.ProgressCard
-import org.wikipedia.feed.suggestededits.SuggestedEditsFeedClient
-import org.wikipedia.feed.topread.TopReadListCard
+import org.wikipedia.feed.random.RandomCard
 import org.wikipedia.settings.Prefs
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.ThrowableUtil
 import org.wikipedia.util.log.L
+import java.util.Calendar
 import java.util.Collections
 
 abstract class FeedCoordinatorBase(private val context: Context) {
@@ -37,7 +39,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     private val progressCard = ProgressCard()
     private var wiki: WikiSite? = null
     private var updateListener: FeedUpdateListener? = null
-    private var currentDayCardAge = -1
+    private var currentMonthCardKey = -1
+    private val monthlyCardTypesShownThisMonth = mutableSetOf<CardType>()
     private val hiddenCards =
         Collections.newSetFromMap(object : LinkedHashMap<String, Boolean>() {
             public override fun removeEldestEntry(eldest: Map.Entry<String, Boolean>): Boolean {
@@ -63,7 +66,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     open fun reset() {
         wiki = null
         age = 0
-        currentDayCardAge = -1
+        currentMonthCardKey = -1
+        monthlyCardTypesShownThisMonth.clear()
         for (client in pendingClients) {
             client.cancel()
         }
@@ -98,16 +102,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
                 FeedContentType.RANDOM.isEnabled = false
                 FeedContentType.saveState()
             }
-            card.type() === CardType.MAIN_PAGE -> {
-                FeedContentType.MAIN_PAGE.isEnabled = false
-                FeedContentType.saveState()
-            }
             card.type() == CardType.PLACES -> {
                 FeedContentType.PLACES.isEnabled = false
-                FeedContentType.saveState()
-            }
-            card.type() == CardType.WIKI_GAMES -> {
-                FeedContentType.WIKI_GAMES.isEnabled = false
                 FeedContentType.saveState()
             }
             else -> {
@@ -125,16 +121,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
                 FeedContentType.RANDOM.isEnabled = true
                 FeedContentType.saveState()
             }
-            card.type() === CardType.MAIN_PAGE -> {
-                FeedContentType.MAIN_PAGE.isEnabled = true
-                FeedContentType.saveState()
-            }
             card.type() == CardType.PLACES -> {
                 FeedContentType.PLACES.isEnabled = true
-                FeedContentType.saveState()
-            }
-            card.type() == CardType.WIKI_GAMES -> {
-                FeedContentType.WIKI_GAMES.isEnabled = true
                 FeedContentType.saveState()
             }
             else -> unHideCard(card)
@@ -236,9 +224,18 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     private fun appendCard(card: Card) {
         val progressPos = cards.indexOf(progressCard)
         var pos = if (progressPos >= 0) progressPos else cards.size
-        if (isDailyCardType(card) && currentDayCardAge < age) {
-            currentDayCardAge = age
-            insertCard(DayHeaderCard(currentDayCardAge), pos++)
+        if (isMonthlyCardType(card)) {
+            val monthKey = Calendar.getInstance().apply { add(Calendar.MONTH, -age) }
+                .let { it.get(Calendar.YEAR) * 12 + it.get(Calendar.MONTH) }
+            if (monthKey != currentMonthCardKey) {
+                currentMonthCardKey = monthKey
+                monthlyCardTypesShownThisMonth.clear()
+                insertCard(MonthHeaderCard(age), pos++)
+            }
+            // Only one card of a given monthly type (e.g. one Random pick) per calendar month.
+            if (!monthlyCardTypesShownThisMonth.add(card.type())) {
+                return
+            }
         }
         insertCard(card, pos)
     }
@@ -273,15 +270,14 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         Prefs.hiddenCards = hiddenCards
     }
 
-    private fun isDailyCardType(card: Card): Boolean {
-        return card is NewsCard || card is OnThisDayCard ||
-                card is TopReadListCard || card is FeaturedArticleCard ||
-                card is FeaturedImageCard
+    private fun isMonthlyCardType(card: Card): Boolean {
+        return card is DestinationOfTheMonthCard || card is OffTheBeatenPathCard ||
+                card is FeaturedTravelTopicCard || card is DiscoverCard || card is RandomCard ||
+                card is BecauseYouReadCard || card is PlacesCard
     }
 
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {
-        return pendingClient is SuggestedEditsFeedClient ||
-                pendingClient is AnnouncementClient ||
+        return pendingClient is AnnouncementClient ||
                 pendingClient is BecauseYouReadClient ||
                 pendingClient is PlacesFeedClient ||
                 pendingClient == null

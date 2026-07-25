@@ -551,7 +551,7 @@ fun ReadingListInterestSearchCard(onSearchClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun PreviewReadingListInterestsScreen() {
-    val site = WikiSite("https://en.wikipedia.org/".toUri(), "en")
+    val site = WikiSite("https://en.wiktionary.org/".toUri(), "en")
     val titles = listOf(
         PageTitle(text = "Psychology of art", wiki = site, thumbUrl = "foo.jpg", description = "Study of mental functions and behaviors", displayText = null),
         PageTitle(text = "Industrial design", wiki = site, thumbUrl = "foo.jpg", description = "Process of design applied to physical products", displayText = null),

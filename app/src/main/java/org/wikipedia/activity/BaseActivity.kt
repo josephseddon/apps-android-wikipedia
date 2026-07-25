@@ -36,7 +36,6 @@ import org.wikipedia.events.ReadingListsNoLongerSyncedEvent
 import org.wikipedia.events.SplitLargeListsEvent
 import org.wikipedia.events.ThemeFontChangeEvent
 import org.wikipedia.events.UnreadNotificationsEvent
-import org.wikipedia.games.onthisday.OnThisDayGameResultFragment
 import org.wikipedia.login.LoginActivity
 import org.wikipedia.main.MainActivity
 import org.wikipedia.notifications.NotificationPresenter
@@ -56,9 +55,6 @@ import org.wikipedia.views.ImageZoomHelper
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeInstallWidgetDialog
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeOnboardingActivity
 import org.wikipedia.widgets.readingchallenge.ReadingChallengeWidgetRepository
-import org.wikipedia.yearinreview.YearInReviewActivity
-import org.wikipedia.yearinreview.YearInReviewOnboardingActivity
-import org.wikipedia.yearinreview.YearInReviewViewModel
 
 abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callback {
     interface Callback {
@@ -95,12 +91,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
         // TODO: Show message(s) to the user if they deny the permission
     }
 
-    private val yearInReviewLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_CANCELED) {
-            FeedbackUtil.showMessage(this, getString(R.string.year_in_review_get_started_later))
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (!DeviceUtil.assertAppContext(this, true)) {
@@ -135,7 +125,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
         setStatusBarColor(ResourceUtil.getThemedColor(this, R.attr.paper_color))
         setNavigationBarColor(ResourceUtil.getThemedColor(this, R.attr.paper_color))
         maybeShowLoggedOutInBackgroundDialog()
-        maybeShowYearInReview()
         maybeShowReadingChallengePrompt()
 
         Prefs.localClassName = localClassName
@@ -236,13 +225,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
         return super.dispatchTouchEvent(event)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == RESULT_OK && data?.hasExtra(OnThisDayGameResultFragment.EXTRA_GAME_COMPLETED) == true) {
-            OnThisDayGameResultFragment.maybeShowOnThisDayGameEndContent(this)
-        }
-    }
-
     protected fun setStatusBarColor(@ColorInt color: Int) {
         window.statusBarColor = color
     }
@@ -271,14 +253,6 @@ abstract class BaseActivity : AppCompatActivity(), ConnectionStateMonitor.Callba
 
     fun getInstrument(): InstrumentImpl? {
         return _instrument
-    }
-
-    private fun maybeShowYearInReview() {
-        if (this !is YearInReviewOnboardingActivity && this !is YearInReviewActivity &&
-            !Prefs.isInitialOnboardingEnabled &&
-            YearInReviewViewModel.isAccessible && Prefs.isYearInReviewEnabled && !Prefs.yearInReviewVisited) {
-            yearInReviewLauncher.launch((YearInReviewOnboardingActivity.newIntent(this)))
-        }
     }
 
     protected fun maybeShowReadingChallengePrompt() {

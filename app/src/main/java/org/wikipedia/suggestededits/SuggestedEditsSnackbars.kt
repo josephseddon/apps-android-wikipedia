@@ -15,9 +15,6 @@ object SuggestedEditsSnackbars {
         fun open(actionView: View)
     }
 
-    private const val MAX_SHOW_PER_SESSION = 2
-    private val snackbarSessionMap = mutableMapOf<String, Int>()
-
     fun show(activity: Activity, action: Action?, sequentialSnackbar: Boolean = true, targetLanguageCode: String? = null,
              enableViewAction: Boolean = false, listener: OpenPageListener? = null) {
         val app = WikipediaApp.instance
@@ -48,45 +45,13 @@ object SuggestedEditsSnackbars {
                             if (activity.isDestroyed) {
                                 return
                             }
-                            showFeedLinkSnackbar(activity, action)
+                            AccountUtil.maybeShowTempAccountWelcome(activity)
                         }
                     })
 
             snackbar.show()
         } else {
-            showFeedLinkSnackbar(activity, action)
-        }
-    }
-
-    private fun showFeedLinkSnackbar(activity: Activity, action: Action?) {
-        if (action != null && getSessionCount(activity, action) < MAX_SHOW_PER_SESSION) {
-            FeedbackUtil.makeSnackbar(activity, activity.getString(R.string.description_edit_success_se_general_feed_link_snackbar))
-                    .setAction(R.string.suggested_edits_tasks_onboarding_get_started) {
-                        activity.startActivity(SuggestionsActivity.newIntent(activity, action))
-                    }
-                    .addCallback(object : Snackbar.Callback() {
-                        override fun onDismissed(transientBottomBar: Snackbar, @DismissEvent event: Int) {
-                            if (!activity.isDestroyed) {
-                                AccountUtil.maybeShowTempAccountWelcome(activity)
-                            }
-                        }
-                    })
-                    .show()
-            incrementSessionMap(activity, action)
-        } else {
             AccountUtil.maybeShowTempAccountWelcome(activity)
         }
-    }
-
-    private fun incrementSessionMap(activity: Activity, action: Action) {
-        snackbarSessionMap[getMapKey(activity, action)] = getSessionCount(activity, action) + 1
-    }
-
-    private fun getSessionCount(activity: Activity, action: Action): Int {
-        return snackbarSessionMap.getOrPut(getMapKey(activity, action), { 0 })
-    }
-
-    private fun getMapKey(activity: Activity, action: Action): String {
-        return activity.componentName.className + "." + action.name
     }
 }

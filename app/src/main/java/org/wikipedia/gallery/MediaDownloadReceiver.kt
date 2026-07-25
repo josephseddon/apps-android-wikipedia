@@ -15,7 +15,6 @@ import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import org.wikipedia.Constants
 import org.wikipedia.R
-import org.wikipedia.feed.image.FeaturedImage
 import org.wikipedia.page.PageTitle
 import org.wikipedia.util.FileUtil
 import java.io.File
@@ -35,12 +34,6 @@ class MediaDownloadReceiver : BroadcastReceiver() {
     fun unregister(context: Context) {
         context.unregisterReceiver(this)
         callback = null
-    }
-
-    fun download(context: Context, featuredImage: FeaturedImage) {
-        val filename = FileUtil.sanitizeFileName(featuredImage.title)
-        val targetDirectory = Environment.DIRECTORY_PICTURES
-        performDownloadRequest(context, featuredImage.original.source.toUri(), targetDirectory, filename, null)
     }
 
     fun download(context: Context, imageTitle: PageTitle, mediaInfo: ImageInfo) {

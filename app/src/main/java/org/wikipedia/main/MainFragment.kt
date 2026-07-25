@@ -1,12 +1,9 @@
 package org.wikipedia.main
 
-import android.Manifest
 import android.app.Activity
 import android.app.ActivityOptions
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.util.Pair
@@ -18,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.view.descendants
 import androidx.core.view.get
@@ -41,9 +37,7 @@ import org.wikipedia.activity.FragmentUtil.getCallback
 import org.wikipedia.activitytab.ActivityTabFragment
 import org.wikipedia.activitytab.ActivityTabOnboardingActivity
 import org.wikipedia.analytics.eventplatform.ReadingListsAnalyticsHelper
-import org.wikipedia.analytics.eventplatform.WikiGamesEvent
 import org.wikipedia.auth.AccountUtil
-import org.wikipedia.commons.FilePageActivity
 import org.wikipedia.concurrency.FlowEventBus
 import org.wikipedia.databinding.FragmentMainBinding
 import org.wikipedia.dataclient.WikiSite
@@ -52,14 +46,8 @@ import org.wikipedia.events.LoggedOutEvent
 import org.wikipedia.events.LoggedOutInBackgroundEvent
 import org.wikipedia.events.NewRecommendedReadingListEvent
 import org.wikipedia.feed.FeedFragment
-import org.wikipedia.feed.image.FeaturedImage
-import org.wikipedia.feed.image.FeaturedImageCard
-import org.wikipedia.feed.news.NewsActivity
-import org.wikipedia.feed.news.NewsCard
-import org.wikipedia.feed.news.NewsItemView
 import org.wikipedia.gallery.GalleryActivity
 import org.wikipedia.gallery.MediaDownloadReceiver
-import org.wikipedia.games.GamesHubActivity
 import org.wikipedia.history.HistoryEntry
 import org.wikipedia.history.HistoryFragment
 import org.wikipedia.login.LoginActivity
@@ -82,22 +70,14 @@ import org.wikipedia.settings.SettingsActivity
 import org.wikipedia.staticdata.MainPageNameData
 import org.wikipedia.staticdata.UserAliasData
 import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.suggestededits.SuggestedEditsTasksActivity
-import org.wikipedia.suggestededits.SuggestedEditsTasksFragment
 import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.usercontrib.UserContribListActivity
 import org.wikipedia.util.DimenUtil
 import org.wikipedia.util.FeedbackUtil
-import org.wikipedia.util.ShareUtil
 import org.wikipedia.util.TabUtil
 import org.wikipedia.views.NotificationButtonView
 import org.wikipedia.views.TabCountsView
-import org.wikipedia.views.imageservice.ImageService
 import org.wikipedia.watchlist.WatchlistActivity
-import org.wikipedia.yearinreview.YearInReviewDialog
-import org.wikipedia.yearinreview.YearInReviewOnboardingActivity
-import org.wikipedia.yearinreview.YearInReviewViewModel
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.Callback, HistoryFragment.Callback, MenuNavTabDialog.Callback, ActivityTabFragment.Callback {
@@ -115,19 +95,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
     private val downloadReceiver = MediaDownloadReceiver()
     private val downloadReceiverCallback = MediaDownloadReceiverCallback()
     private val pageChangeCallback = PageChangeCallback()
-
-    // The permissions request API doesn't take a callback, so in the event we have to
-    // ask for permission to download a featured image from the feed, we'll have to hold
-    // the image we're waiting for permission to download as a bit of state here. :(
-    private var pendingDownloadImage: FeaturedImage? = null
-
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            pendingDownloadImage?.let { download(it) }
-        } else {
-            FeedbackUtil.showMessage(this, R.string.gallery_save_image_write_permission_rationale)
-        }
-    }
 
     private val activityTabOnboardingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -218,11 +185,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         downloadReceiver.register(requireContext(), downloadReceiverCallback)
         // reset the last-page-viewed timer
         Prefs.pageLastShown = 0
-        YearInReviewDialog.maybeShowYearInReviewFeedbackDialog(requireActivity())
-        if (YearInReviewViewModel.getYearInReviewModel()?.isReadingListCreated == true) {
-            onNavigateTo(NavTab.READING_LISTS) // Navigate to reading lists only if Year in Review reading list is created
-            YearInReviewViewModel.updateYearInReviewModel { it.copy(isReadingListCreated = false) }
-        }
     }
 
     override fun onDestroyView() {
@@ -304,7 +266,7 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         menu.findItem(R.id.menu_overflow_button).isVisible = currentFragment is ReadingListsFragment
 
         val tabsItem = menu.findItem(R.id.menu_tabs)
-        if (WikipediaApp.instance.tabCount < 1 || currentFragment is SuggestedEditsTasksFragment) {
+        if (WikipediaApp.instance.tabCount < 1) {
             tabsItem.isVisible = false
             tabCountsView = null
         } else {
@@ -408,43 +370,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         ReadingListBehaviorsUtil.moveToList(requireActivity(), sourceReadingListId, entry.title, InvokeSource.FEED)
     }
 
-    override fun onFeedNewsItemSelected(card: NewsCard, view: NewsItemView) {
-        val options = ActivityOptions.makeSceneTransitionAnimation(requireActivity(), view.imageView, getString(R.string.transition_news_item))
-        view.newsItem?.let {
-            startActivity(NewsActivity.newIntent(requireActivity(), it, card.wikiSite()), if (it.thumb() != null) options.toBundle() else null)
-        }
-    }
-
-    override fun onFeedSeCardFooterClicked() {
-        startActivity(SuggestedEditsTasksActivity.newIntent(requireActivity()))
-    }
-
-    override fun onFeedShareImage(card: FeaturedImageCard) {
-        val thumbUrl = card.baseImage().thumbnailUrl
-        val fullSizeUrl = card.baseImage().original.source
-        ImageService.loadImage(requireContext(), thumbUrl, onSuccess = { bitmap ->
-            if (!isAdded) {
-                return@loadImage
-            }
-            ShareUtil.shareImage(lifecycleScope, requireContext(), bitmap, File(thumbUrl).name,
-                ShareUtil.getFeaturedImageShareSubject(requireContext(), card.age()), fullSizeUrl)
-        })
-    }
-
-    override fun onFeedDownloadImage(image: FeaturedImage) {
-        pendingDownloadImage = image
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            download(image)
-        } else {
-            requestPermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        }
-    }
-
-    override fun onFeaturedImageSelected(card: FeaturedImageCard) {
-        startActivity(FilePageActivity.newIntent(requireActivity(), PageTitle(card.filename(), card.wikiSite())))
-    }
-
     override fun onLoginRequested() {
         startActivityForResult(LoginActivity.newIntent(requireContext(), LoginActivity.SOURCE_NAV),
                 Constants.ACTIVITY_REQUEST_LOGIN)
@@ -452,11 +377,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
 
     override fun updateToolbarElevation(elevate: Boolean) {
         callback()?.updateToolbarElevation(elevate)
-    }
-
-    override fun onWikiGamesCardFooterClicked() {
-        WikiGamesEvent.submit(action = "more_click", "game_feed")
-        startActivity(GamesHubActivity.newIntent(requireActivity()))
     }
 
     fun requestUpdateToolbarElevation() {
@@ -516,10 +436,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         (requireActivity() as? BaseActivity)?.launchDonateDialog(campaignId = campaignId)
     }
 
-    override fun yearInReviewClick() {
-        startActivity(YearInReviewOnboardingActivity.newIntent(requireActivity()))
-    }
-
     fun setBottomNavVisible(visible: Boolean) {
         binding.mainNavTabBorder.isVisible = visible
         binding.mainNavTabLayout.isVisible = visible
@@ -559,12 +475,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
         return TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis() - Prefs.pageLastShown) < days
     }
 
-    private fun download(image: FeaturedImage) {
-        pendingDownloadImage = null
-        downloadReceiver.download(requireContext(), image)
-        FeedbackUtil.showMessage(this, R.string.gallery_save_progress)
-    }
-
     fun openSearchActivity(source: InvokeSource, query: String?, transitionView: View?) {
         val intent = SearchActivity.newIntent(requireActivity(), source, query)
         val options = transitionView?.let {
@@ -580,7 +490,6 @@ class MainFragment : Fragment(), BackPressedHandler, MenuProvider, FeedFragment.
             is FeedFragment -> fragment.refresh()
             is ReadingListsFragment -> fragment.updateLists()
             is HistoryFragment -> fragment.refresh()
-            is SuggestedEditsTasksFragment -> fragment.refreshContents()
         }
     }
 

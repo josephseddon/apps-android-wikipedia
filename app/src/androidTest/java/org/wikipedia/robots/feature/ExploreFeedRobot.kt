@@ -60,38 +60,6 @@ class ExploreFeedRobot : BaseRobot() {
             )
     }
 
-    fun clickPictureOfTheDay(position: Int) = apply {
-        onView(withId(R.id.feed_view))
-            .perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                    position,
-                    list.moveClickIntoViewAndClick(R.id.view_featured_image_card_content_container)
-                )
-            )
-        delay(TestConfig.DELAY_SHORT)
-    }
-
-    fun clickNewsArticle(position: Int) = apply {
-        onView(withId(R.id.feed_view))
-            .perform(
-                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                    position,
-                    list.clickNestedItem(R.id.news_cardview_recycler_view, 0)
-                )
-            )
-        delay(TestConfig.DELAY_SHORT)
-    }
-
-    fun clickOnThisDayCard(position: Int) = apply {
-        onView(withId(R.id.feed_view))
-            .perform(
-                actionOnItemAtPosition<RecyclerView.ViewHolder>(
-                    position,
-                    list.moveClickIntoViewAndClick(R.id.on_this_day_card_view_click_container)
-                )
-            )
-        delay(TestConfig.DELAY_SHORT)
-    }
 
     fun clickRandomArticle(position: Int) = apply {
         onView(withId(R.id.feed_view))

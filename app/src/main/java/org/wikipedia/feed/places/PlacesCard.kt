@@ -23,7 +23,7 @@ class PlacesCard(
     }
 
     override fun subtitle(): String {
-        return DateUtil.getFeedCardDateString(age)
+        return DateUtil.getFeedCardMonthString(age)
     }
 
     fun footerActionText(): String {

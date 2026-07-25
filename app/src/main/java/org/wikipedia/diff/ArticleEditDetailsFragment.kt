@@ -49,7 +49,6 @@ import org.wikipedia.page.linkpreview.LinkPreviewDialog
 import org.wikipedia.settings.Prefs
 import org.wikipedia.staticdata.UserAliasData
 import org.wikipedia.staticdata.UserTalkAliasData
-import org.wikipedia.suggestededits.SuggestedEditsCardsFragment
 import org.wikipedia.talk.TalkReplyActivity
 import org.wikipedia.talk.TalkTopicsActivity
 import org.wikipedia.talk.UserTalkPopupHelper
@@ -409,8 +408,7 @@ class ArticleEditDetailsFragment : Fragment(), WatchlistExpiryDialog.Callback, M
 
     private fun maybeShowOneTimeSequentialRecentEditsTooltips() {
         if (Prefs.showOneTimeSequentialRecentEditsDiffTooltip && viewModel.fromRecentEdits &&
-            binding.oresDamagingButton.isVisible && binding.oresGoodFaithButton.isVisible &&
-            parentFragment == FragmentUtil.getAncestor(this, SuggestedEditsCardsFragment::class.java)?.topBaseChild()) {
+            binding.oresDamagingButton.isVisible && binding.oresGoodFaithButton.isVisible) {
             Prefs.showOneTimeSequentialRecentEditsDiffTooltip = false
             binding.root.removeCallbacks(sequentialTooltipRunnable)
             binding.root.postDelayed(sequentialTooltipRunnable, 500)
