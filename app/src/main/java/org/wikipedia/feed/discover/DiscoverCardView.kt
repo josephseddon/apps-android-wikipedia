@@ -45,9 +45,7 @@ class DiscoverCardView(context: Context) : DefaultFeedCardView<DiscoverCard>(con
             binding.viewDiscoverCardImage.isVisible = false
         }
         binding.viewDiscoverCardFacts.movementMethod = movementMethod(card.wikiSite())
-        binding.viewDiscoverCardFacts.text = StringUtil.fromHtml(
-            card.facts().joinToString("\n\n") { "&#8226; $it" }
-        )
+        binding.viewDiscoverCardFacts.text = StringUtil.fromHtml(card.facts().firstOrNull().orEmpty())
     }
 
     private fun movementMethod(wiki: WikiSite): LinkMovementMethodExt {
