@@ -40,9 +40,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:lineSpacingExtra="4dp"
+                android:ellipsize="end"
+                android:maxLines="4"
+                android:lineSpacingMultiplier="1.3"
                 android:textColor="?attr/primary_color"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 tools:text="The Eise Eisenga Planetarium in Franeker is the world's oldest still operational planetarium." />
 
         </LinearLayout>
