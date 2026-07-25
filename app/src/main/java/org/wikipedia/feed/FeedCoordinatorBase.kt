@@ -4,6 +4,7 @@ import android.content.Context
 import org.wikipedia.dataclient.WikiSite
 import org.wikipedia.feed.accessibility.AccessibilityCard
 import org.wikipedia.feed.announcement.AnnouncementClient
+import org.wikipedia.feed.becauseyouread.BecauseYouReadCard
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCard
@@ -14,6 +15,7 @@ import org.wikipedia.feed.model.CardType
 import org.wikipedia.feed.monthheader.MonthHeaderCard
 import org.wikipedia.feed.offline.OfflineCard
 import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathCard
+import org.wikipedia.feed.places.PlacesCard
 import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.progress.ProgressCard
 import org.wikipedia.feed.random.RandomCard
@@ -270,7 +272,8 @@ abstract class FeedCoordinatorBase(private val context: Context) {
 
     private fun isMonthlyCardType(card: Card): Boolean {
         return card is DestinationOfTheMonthCard || card is OffTheBeatenPathCard ||
-                card is FeaturedTravelTopicCard || card is DiscoverCard || card is RandomCard
+                card is FeaturedTravelTopicCard || card is DiscoverCard || card is RandomCard ||
+                card is BecauseYouReadCard || card is PlacesCard
     }
 
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {
