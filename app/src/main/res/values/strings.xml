@@ -836,6 +836,11 @@
     <string name="view_top_read_card_pageviews_m_suffix">%d M</string>
     <string name="view_next_random_article">Load another random article</string>
     <string name="view_main_page_card_title">Today on Wikipedia</string>
+    <string name="view_destination_of_the_month_card_title">Destination of the Month</string>
+    <string name="view_off_the_beaten_path_card_title">Off the Beaten Path</string>
+    <string name="view_featured_travel_topic_card_title">Featured Travel Topic</string>
+    <string name="view_discover_card_title">Discover</string>
+    <string name="view_wikivoyage_archive_action">See past picks</string>
     <string name="view_featured_image_card_download">Download</string>
     <string name="view_featured_image_card_share">Share</string>
     <string name="menu_feed_card_dismiss">Hide this card</string>
@@ -865,6 +870,10 @@
     <string name="feed_item_type_randomizer">Generate random articles to read</string>
     <string name="feed_item_type_suggested_edits">Suggestions to add content to Wikipedia</string>
     <string name="feed_item_type_places">Nearby articles based on the current location</string>
+    <string name="feed_item_type_destination_of_the_month">Wikivoyage\'s showcase destination for this month</string>
+    <string name="feed_item_type_off_the_beaten_path">A lesser-known destination featured by Wikivoyage this month</string>
+    <string name="feed_item_type_featured_travel_topic">A featured itinerary, phrasebook, or travel topic from Wikivoyage this month</string>
+    <string name="feed_item_type_discover">Interesting travel facts curated by Wikivoyage</string>
     <string name="feed_empty_message">There\'s nothing on your Explore feed</string>
     <string name="feed_configure_onboarding_action">Customize</string>
     <string name="customize_lang_selection_dialog_ok_button_text">OK</string>

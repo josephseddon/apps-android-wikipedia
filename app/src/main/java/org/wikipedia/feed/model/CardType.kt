@@ -7,7 +7,11 @@ import org.wikipedia.feed.accessibility.AccessibilityCardView
 import org.wikipedia.feed.announcement.AnnouncementCardView
 import org.wikipedia.feed.becauseyouread.BecauseYouReadCardView
 import org.wikipedia.feed.dayheader.DayHeaderCardView
+import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCardView
+import org.wikipedia.feed.discover.DiscoverCardView
+import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicCardView
 import org.wikipedia.feed.offline.OfflineCardView
+import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathCardView
 import org.wikipedia.feed.places.PlacesCardView
 import org.wikipedia.feed.progress.ProgressCardView
 import org.wikipedia.feed.random.RandomCardView
@@ -67,6 +71,26 @@ enum class CardType(
     PLACES(23, FeedContentType.PLACES) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return PlacesCardView(ctx)
+        }
+    },
+    DESTINATION_OF_THE_MONTH(24, FeedContentType.DESTINATION_OF_THE_MONTH) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return DestinationOfTheMonthCardView(ctx)
+        }
+    },
+    OFF_THE_BEATEN_PATH(25, FeedContentType.OFF_THE_BEATEN_PATH) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return OffTheBeatenPathCardView(ctx)
+        }
+    },
+    FEATURED_TRAVEL_TOPIC(26, FeedContentType.FEATURED_TRAVEL_TOPIC) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return FeaturedTravelTopicCardView(ctx)
+        }
+    },
+    DISCOVER(27, FeedContentType.DISCOVER) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return DiscoverCardView(ctx)
         }
     },
     DAY_HEADER(97) {

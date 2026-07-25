@@ -323,6 +323,12 @@
             android:name=".places.PlacesFilterActivity"/>
 
         <activity
+            android:name=".wikivoyage.archive.WikivoyageSpotlightArchiveActivity" />
+
+        <activity
+            android:name=".wikivoyage.archive.WikivoyageDiscoverArchiveActivity" />
+
+        <activity
             android:name=".talk.template.TalkTemplatesActivity"
             android:theme="@style/AppTheme" />
 

@@ -6,6 +6,10 @@ import org.wikipedia.R
 import org.wikipedia.feed.accessibility.AccessibilityCardClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
+import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthClient
+import org.wikipedia.feed.discover.DiscoverClient
+import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicClient
+import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathClient
 import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.random.RandomClient
 import org.wikipedia.model.EnumCode
@@ -30,6 +34,26 @@ enum class FeedContentType(private val code: Int,
     PLACES(11, R.string.places_title, R.string.feed_item_type_places, false) {
         override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
             return if (isEnabled) PlacesFeedClient(coroutineScope) else null
+        }
+    },
+    DESTINATION_OF_THE_MONTH(12, R.string.view_destination_of_the_month_card_title, R.string.feed_item_type_destination_of_the_month, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) DestinationOfTheMonthClient(coroutineScope) else null
+        }
+    },
+    OFF_THE_BEATEN_PATH(13, R.string.view_off_the_beaten_path_card_title, R.string.feed_item_type_off_the_beaten_path, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) OffTheBeatenPathClient(coroutineScope) else null
+        }
+    },
+    FEATURED_TRAVEL_TOPIC(14, R.string.view_featured_travel_topic_card_title, R.string.feed_item_type_featured_travel_topic, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) FeaturedTravelTopicClient(coroutineScope) else null
+        }
+    },
+    DISCOVER(15, R.string.view_discover_card_title, R.string.feed_item_type_discover, false) {
+        override fun newClient(coroutineScope: CoroutineScope): FeedClient? {
+            return if (isEnabled) DiscoverClient(coroutineScope) else null
         }
     },
     ACCESSIBILITY(10, 0, 0, false, false) {
