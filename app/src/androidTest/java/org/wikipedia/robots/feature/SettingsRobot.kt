@@ -54,14 +54,14 @@ class SettingsRobot : BaseRobot() {
 
     fun hideAllExploreFeeds() = apply {
         // Choose the option to hide all explore feed cards
-        onView(allOf(withId(R.id.title), withText("Hide all"),
+        onView(allOf(withId(android.R.id.title), withText("Hide all"),
             childAtPosition(childAtPosition(withId(androidx.appcompat.R.id.content), 0), 0), isDisplayed()))
             .perform(click())
         delay(TestConfig.DELAY_SHORT)
     }
 
     fun showAllExploreFeeds() = apply {
-        onView(allOf(withId(R.id.title), withText("Show all"),
+        onView(allOf(withId(android.R.id.title), withText("Show all"),
             childAtPosition(childAtPosition(withId(androidx.appcompat.R.id.content), 0), 0), isDisplayed()))
             .perform(click())
         delay(TestConfig.DELAY_SHORT)
