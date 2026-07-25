@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name_prod">Wiktionary</string>
-    <string name="app_name_beta" tools:ignore="UnusedResources">Wiktionary Beta</string>
-    <string name="app_name_alpha" tools:ignore="UnusedResources">Wiktionary Alpha</string>
+    <string name="app_name_prod">Wikivoyage</string>
+    <string name="app_name_beta" tools:ignore="UnusedResources">Wikivoyage Beta</string>
+    <string name="app_name_alpha" tools:ignore="UnusedResources">Wikivoyage Alpha</string>
 
     <string name="wikimedia">Wikimedia</string>
 
     <string name="nav_item_back">Back</string>
     <string name="page_tabs_back">Back</string>
     <string name="nav_item_forward">Forward</string>
-    <string name="search_hint">Search Wiktionary</string>
+    <string name="search_hint">Search Wikivoyage</string>
     <string name="search_hint_voice_search">Voice input search</string>
     <string name="search_hint_search_languages">Search for a language</string>
     <string name="search_back_button_content_description">Go back</string>
@@ -247,7 +247,7 @@
     <string name="page_watchlist_overflow_menu_onboarding_tooltip_text"><![CDATA[Keep track of what\'s happening to articles you are interested in. Tap the overflow menu and select <b>Add to Watchlist</b> to see changes to an article.]]></string>
     <string name="settings_item_preferences">Settings</string>
     <string name="settings_activity_title">Settings</string>
-    <string name="about_description">About the Wiktionary app</string>
+    <string name="about_description">About the Wikivoyage app</string>
     <string name="privacy_policy_description">Privacy policy</string>
     <string name="terms_of_use_description">Terms of use</string>
     <string name="legal_safety_contacts_description">Legal and safety contacts</string>
@@ -270,7 +270,7 @@
     <string name="about_app_license"><![CDATA[Source code available on <a href=\"https://github.com/wikimedia/apps-android-wikipedia\">GitHub</a> under the <a href=\"https://www.apache.org/licenses/LICENSE-2.0\">Apache 2.0 License</a>. Unless otherwise specified, content is available under a <a href=\"https://creativecommons.org/licenses/by-sa/4.0\">Creative Commons Attribution-ShareAlike License</a>.]]></string>
     <string name="about_wmf"><![CDATA[A product of the <a href="https://wikimediafoundation.org/">Wikimedia Foundation</a>]]></string>
     <string name="about_activity_title">About</string>
-    <string name="about_logo_content_description">Wiktionary logo</string>
+    <string name="about_logo_content_description">Wikivoyage logo</string>
     <string name="edit_abandon_confirm">The page has been modified. Are you sure you want to exit without saving your changes?</string>
     <string name="edit_abandon_confirm_yes">Yes</string>
     <string name="edit_abandon_confirm_no">No</string>
@@ -1297,7 +1297,7 @@
     <string name="onboarding_get_started">Get started</string>
     <string name="onboarding_maybe_later">Maybe later</string>
     <string name="onboarding_explore_title">New ways to explore</string>
-    <string name="onboarding_explore_text"><![CDATA[Dive down the Wiktionary rabbit hole with a constantly updating Explore feed. <br/> <b>Customize</b> the feed to your interests – whether it\'s learning about historical events <b>On this day</b>, or rolling the dice with <b>Random</b>.]]></string>
+    <string name="onboarding_explore_text"><![CDATA[Dive down the Wikivoyage rabbit hole with a constantly updating Explore feed. <br/> <b>Customize</b> the feed to your interests – whether it\'s discovering nearby destinations with <b>Places</b>, or rolling the dice with <b>Random</b>.]]></string>
     <string name="onboarding_reading_list_sync_title">Reading lists with sync</string>
     <string name="onboarding_reading_list_sync_text_v2"><![CDATA[You can make reading lists from articles you want to read later, even when you\'re offline. <br/>Login to your Wikimedia account to sync your reading lists. <a href="#login">Join Wikimedia</a>]]></string>
     <string name="onboarding_data_privacy_title">Data &amp; Privacy</string>
@@ -2218,7 +2218,7 @@
     <!--Recommended Reading list -->
     <string name="recommended_reading_list_title">Discover</string>
     <string name="recommended_reading_list_onboarding_card_title">Discover articles picked just for you</string>
-    <string name="recommended_reading_list_onboarding_card_message">Your weekly reading list of Wiktionary articles, curated just for you.</string>
+    <string name="recommended_reading_list_onboarding_card_message">Your weekly reading list of Wikivoyage articles, curated just for you.</string>
     <string name="recommended_reading_list_onboarding_card_new">New!</string>
     <string name="recommended_reading_list_onboarding_card_positive_button">Get started</string>
     <string name="recommended_reading_list_onboarding_card_negative_button">No thanks</string>
