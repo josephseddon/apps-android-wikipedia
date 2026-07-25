@@ -7,16 +7,23 @@ import org.wikipedia.feed.announcement.AnnouncementClient
 import org.wikipedia.feed.becauseyouread.BecauseYouReadClient
 import org.wikipedia.feed.dataclient.FeedClient
 import org.wikipedia.feed.dayheader.DayHeaderCard
-import org.wikipedia.feed.featured.FeaturedArticleCard
+import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCard
+import org.wikipedia.feed.discover.DiscoverCard
+import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicCard
 import org.wikipedia.feed.model.Card
 import org.wikipedia.feed.model.CardType
+import org.wikipedia.feed.monthheader.MonthHeaderCard
 import org.wikipedia.feed.offline.OfflineCard
+import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathCard
 import org.wikipedia.feed.places.PlacesFeedClient
 import org.wikipedia.feed.progress.ProgressCard
+import org.wikipedia.feed.random.RandomCard
 import org.wikipedia.settings.Prefs
+import org.wikipedia.util.DateUtil
 import org.wikipedia.util.DeviceUtil
 import org.wikipedia.util.ThrowableUtil
 import org.wikipedia.util.log.L
+import java.util.Calendar
 import java.util.Collections
 
 abstract class FeedCoordinatorBase(private val context: Context) {
@@ -33,6 +40,7 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     private var wiki: WikiSite? = null
     private var updateListener: FeedUpdateListener? = null
     private var currentDayCardAge = -1
+    private var currentMonthCardKey = -1
     private val hiddenCards =
         Collections.newSetFromMap(object : LinkedHashMap<String, Boolean>() {
             public override fun removeEldestEntry(eldest: Map.Entry<String, Boolean>): Boolean {
@@ -59,6 +67,7 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         wiki = null
         age = 0
         currentDayCardAge = -1
+        currentMonthCardKey = -1
         for (client in pendingClients) {
             client.cancel()
         }
@@ -218,6 +227,12 @@ abstract class FeedCoordinatorBase(private val context: Context) {
         if (isDailyCardType(card) && currentDayCardAge < age) {
             currentDayCardAge = age
             insertCard(DayHeaderCard(currentDayCardAge), pos++)
+        } else if (isMonthlyCardType(card)) {
+            val monthKey = DateUtil.getDefaultDateFor(age).let { it.get(Calendar.YEAR) * 12 + it.get(Calendar.MONTH) }
+            if (monthKey != currentMonthCardKey) {
+                currentMonthCardKey = monthKey
+                insertCard(MonthHeaderCard(age), pos++)
+            }
         }
         insertCard(card, pos)
     }
@@ -253,7 +268,12 @@ abstract class FeedCoordinatorBase(private val context: Context) {
     }
 
     private fun isDailyCardType(card: Card): Boolean {
-        return card is FeaturedArticleCard
+        return card is RandomCard
+    }
+
+    private fun isMonthlyCardType(card: Card): Boolean {
+        return card is DestinationOfTheMonthCard || card is OffTheBeatenPathCard ||
+                card is FeaturedTravelTopicCard || card is DiscoverCard
     }
 
     private fun shouldShowProgressCard(pendingClient: FeedClient?): Boolean {

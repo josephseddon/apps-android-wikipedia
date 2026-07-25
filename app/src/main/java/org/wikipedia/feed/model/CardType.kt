@@ -10,6 +10,7 @@ import org.wikipedia.feed.dayheader.DayHeaderCardView
 import org.wikipedia.feed.destinationofthemonth.DestinationOfTheMonthCardView
 import org.wikipedia.feed.discover.DiscoverCardView
 import org.wikipedia.feed.featuredtraveltopic.FeaturedTravelTopicCardView
+import org.wikipedia.feed.monthheader.MonthHeaderCardView
 import org.wikipedia.feed.offline.OfflineCardView
 import org.wikipedia.feed.offthebeatenpath.OffTheBeatenPathCardView
 import org.wikipedia.feed.places.PlacesCardView
@@ -91,6 +92,11 @@ enum class CardType(
     DISCOVER(27, FeedContentType.DISCOVER) {
         override fun newView(ctx: Context): FeedCardView<*> {
             return DiscoverCardView(ctx)
+        }
+    },
+    MONTH_HEADER(96) {
+        override fun newView(ctx: Context): FeedCardView<*> {
+            return MonthHeaderCardView(ctx)
         }
     },
     DAY_HEADER(97) {

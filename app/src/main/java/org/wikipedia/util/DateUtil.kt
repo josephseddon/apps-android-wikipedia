@@ -54,6 +54,10 @@ object DateUtil {
         return getShortDateString(UtcDate(age).baseCalendar.time)
     }
 
+    fun getFeedCardMonthString(age: Int): String {
+        return getDateStringWithSkeletonPattern(getDefaultDateFor(age).time, "MMMM")
+    }
+
     fun getFeedCardShortDateString(date: Calendar): String {
         return getExtraShortDateString(date.time)
     }
