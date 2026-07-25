@@ -123,11 +123,12 @@ object JavaScriptActionHandler {
             return ""
         }
         val showTalkLink = model.page!!.title.namespace() !== Namespace.TALK
+        val showMapLink = model.page!!.pageProperties.geo != null
         val editedDaysAgo = TimeUnit.MILLISECONDS.toDays(Date().time - model.page!!.pageProperties.lastModified.time)
         val langCode = model.title?.wikiSite?.languageCode ?: WikipediaApp.instance.appOrSystemLanguageCode
 
-        // No coordinate (map) or pageIssues menu items: those are encyclopedia-article concepts
-        // that don't apply to Wiktionary entries.
+        // TODO: page-library also supports showing disambiguation ("similar pages") links and
+        // "page issues". We should be mindful that they exist, even if we don't want them for now.
         return "pcs.c1.Footer.add({" +
                 "   platform: \"android\"," +
                 "   clientVersion: \"${BuildConfig.VERSION_NAME}\"," +
@@ -135,6 +136,8 @@ object JavaScriptActionHandler {
                 "       items: [" +
                                 "pcs.c1.Footer.MenuItemType.lastEdited, " +
                                 (if (showTalkLink) "pcs.c1.Footer.MenuItemType.talkPage, " else "") +
+                                (if (showMapLink) "pcs.c1.Footer.MenuItemType.coordinate, " else "") +
+                                "pcs.c1.Footer.MenuItemType.pageIssues, " +
                 "               pcs.c1.Footer.MenuItemType.referenceList " +
                 "              ]," +
                 "       fragment: \"pcs-menu\"," +
@@ -147,14 +150,6 @@ object JavaScriptActionHandler {
                 "       fragment: \"pcs-read-more\"" +
                 "   }" +
                 "})"
-    }
-
-    fun suppressExtraneousChrome(): String {
-        return "(function() {" +
-                "let style = document.createElement('style');" +
-                "style.innerHTML = '.interproject-box { display: none; }';" +
-                "document.head.appendChild(style);" +
-                "})();"
     }
 
     fun appendReadMode(model: PageViewModel): String {

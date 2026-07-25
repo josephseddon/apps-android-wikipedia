@@ -776,7 +776,6 @@ class PageFragment : Fragment(), BackPressedHandler, CommunicationBridge.Communi
                 return@addListener
             }
             bridge.onPcsReady()
-            bridge.execute(JavaScriptActionHandler.suppressExtraneousChrome())
             articleInteractionEvent?.logLoaded()
             callback()?.onPageLoadComplete()
 
